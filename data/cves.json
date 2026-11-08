@@ -1,1 +1,78 @@
-{}
+{
+  "CVE-2026-123549": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-08",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-08",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123549",
+      "https://github.com/OpenIdentityPlatform/OpenAM/security/advisories/GHSA-jv8f-m88g-h6mm",
+      "https://www.vulncheck.com/advisories/openam-before-16.1.4-privilege-escalation-via-self-registration-attribute-bypass"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-123551": {
+    "cvss": {
+      "score": 10.0,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-08",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-08",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123551",
+      "https://github.com/OpenIdentityPlatform/OpenAM/security/advisories/GHSA-5c3q-hp86-xjr8",
+      "https://www.vulncheck.com/advisories/openam-14.0.0-before-16.1.4-session-token-disclosure-via-notification-websocket"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-123966": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-08",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-08",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123966",
+      "https://github.com/Tmzop/Tenda-AC19-saveParentControlInfo/blob/main/report.md",
+      "https://vuldb.com/cve/CVE-2026-123966",
+      "https://vuldb.com/submit/1035173",
+      "https://vuldb.com/vuln/432038",
+      "https://vuldb.com/vuln/432038/cti",
+      "https://www.tenda.com.cn/"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  }
+}

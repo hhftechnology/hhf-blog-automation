@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "cves": [
+      "CVE-2026-123551",
+      "CVE-2026-123549",
+      "CVE-2026-123966"
+    ],
+    "date": "2026-11-08",
+    "industries": [
+      "finance"
+    ],
+    "number": 1,
+    "public_path": "/daily-threat-briefing-sunday-november-8-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "ransomware"
+    ],
+    "title": "Daily Threat Briefing: Sunday, November 8, 2026"
+  }
+]
