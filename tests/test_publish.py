@@ -56,3 +56,38 @@ def test_not_live_raises():
     c, _ = make(None, {"status": "draft"})
     with pytest.raises(RuntimeError, match="not live"):
         publish.publish(c, **KW)
+
+
+def test_excerpt_put_before_publish():
+    c, seen = make(None, LIVE)
+    publish.publish(c, **KW, excerpt="Answer first.")
+    put = [i for i, s in enumerate(seen) if s[0] == "PUT" and s[1] == "/blog-editor/publications/7"]
+    assert len(put) == 1 and put[0] < len(seen) - 1
+    assert json.loads(seen[put[0]][2]) == {"publication": {"excerpt": "Answer first."}}
+    assert seen[-1][1] == "/blog-editor/publications/7/publish"
+
+
+def test_no_excerpt_no_put():
+    c, seen = make(None, LIVE)
+    publish.publish(c, **KW)
+    assert not any(s[1] == "/blog-editor/publications/7" for s in seen)
+
+
+def test_excerpt_failure_does_not_block_publish(capsys):
+    c, seen = make(None, LIVE)
+    real = c.request
+
+    def boom(method, path, **kw):
+        if method == "PUT" and path == "/blog-editor/publications/7":
+            raise RuntimeError("nope")
+        return real(method, path, **kw)
+
+    c.request = boom
+    assert publish.publish(c, **KW, excerpt="x")["topic_id"] == 7
+    assert "excerpt not set" in capsys.readouterr().err
+
+
+def test_make_excerpt():
+    assert publish.make_excerpt("## **Hi** [link](http://u) `c`_x_", "", "- b  2") == "Hi link cx b 2"
+    out = publish.make_excerpt("word " * 100, limit=50)
+    assert len(out) <= 50 and out.endswith("word…")

@@ -455,7 +455,9 @@ def build(since: datetime, now: datetime, *, fx: Fetcher, writer: ai_mod.AIWrite
         "ransomware_total": len(data["rw_rows"]), "ioc_counts": data["ioc_counts"], "ioc_note": ioc_note, "sources": sources,
     }
     title = f"Daily Threat Briefing: {day.strftime('%A')}, {day.strftime('%B')} {day.day}, {day.year}"
-    return {"title": title, "raw": render_daily(ctx), "tags": tags, "external_id": f"daily-briefing-{day.isoformat()}",
+    excerpt = publish_mod.make_excerpt(
+        f"{overall.capitalize()}-severity threat briefing for {day.day} {day.strftime('%B %Y')}.", *ctx["tldr"])
+    return {"title": title, "excerpt": excerpt, "raw": render_daily(ctx), "tags": tags, "external_id": f"daily-briefing-{day.isoformat()}",
             "stats": {**data["stats"], "top_threats": len(top)}, "notes": data["notes"], "ai": writer.stats,
             "overall": overall, "used_ai": used_ai,
             "briefing": {"date": day.isoformat(), "number": number, "title": title, "severity": overall,
@@ -481,7 +483,8 @@ def main(argv: list[str] | None = None) -> int:
     res = build(since, now, fx=default_fetcher(), writer=ai_mod.AIWriter(enabled=not args.no_ai),
                 briefings=store.load_briefings(args.data_dir), cves=store.load_cves(args.data_dir))
     print(json.dumps({"title": res["title"], "overall": res["overall"], "tags": res["tags"], "stats": res["stats"],
-                      "notes": res["notes"], "ai": res["ai"]}, indent=2))
+                      "notes": res["notes"], "ai": res["ai"],
+                      "excerpt": res["excerpt"]}, indent=2))
     if args.dry_run:
         args.out_dir.mkdir(parents=True, exist_ok=True)
         out = args.out_dir / f"daily_briefing-{now.date().isoformat()}.md"
@@ -492,7 +495,7 @@ def main(argv: list[str] | None = None) -> int:
     from .discourse import DiscourseClient
 
     pub = publish_mod.publish(DiscourseClient(), title=res["title"], raw=res["raw"], tags=res["tags"],
-                              external_id=res["external_id"])
+                              external_id=res["external_id"], excerpt=res["excerpt"])
     print(json.dumps(pub))
     day = res["briefing"]["date"]  # store only after the article is live
     store.upsert_briefing({**res["briefing"], "public_path": pub["public_path"]}, args.data_dir)

@@ -19,6 +19,7 @@ from urllib.parse import quote
 import yaml
 
 from . import ai as ai_mod
+from .publish import make_excerpt
 from .facts import Advisory, fmt_date, fmt_range, has_public_poc, kev_matches, md_text, severity_from_cvss
 from .sources import epss, ghsa, kev, nvd, osv, releases, ubuntu
 from .sources.base import Fetcher, SourceError, default_fetcher
@@ -1079,6 +1080,7 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
             [clauses.get(g.label) or clause_for(g, shorts[g.label]) for g in fast_g])
         bullets = takeaways(shown, left + left_missed, missed)
         bullets = [bullet_ai.get(i, b) if not b.startswith("**Also this week**") else b for i, b in enumerate(bullets)]
+        meta["intro"] = intro
         ctx = {
             "intro": intro,
             "items": [view(g, prose[g.label], shorts[g.label]) for g in shown],
@@ -1086,6 +1088,8 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
             "takeaways": bullets, "data_line": DATA_LINE,
         }
         return scrub_pseudo(render_weekly(ctx))
+
+    meta: dict = {}
 
     def fit() -> str:
         raw = render_all()
@@ -1131,7 +1135,7 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
     stats["main"], stats["missed"] = len(shown), len(missed)
     title = f"🚨 Weekly Self-Hosted Security Summary ({fmt_range(since, until)})"
     listed = [a for g in shown + left + missed + left_missed for a in g.advs]
-    return {"title": title, "raw": raw, "tags": TAGS,
+    return {"title": title, "raw": raw, "tags": TAGS, "excerpt": make_excerpt(meta.get("intro", "")),
             "external_id": f"weekly-advisory-{until.isoformat()}", "stats": stats,
             "ids": [x for a in listed for x in [a.key, *a.cves]], "n_main": n_adv,
             "n_missed": sum(len(g.advs) for g in missed), "ai": writer.stats}
@@ -1173,7 +1177,8 @@ def main(argv: list[str] | None = None) -> int:
     from .publish import publish
 
     print(json.dumps(publish(DiscourseClient(), title=res["title"], raw=res["raw"], tags=res["tags"],
-                             external_id=res["external_id"])))
+                             external_id=res["external_id"],
+                             excerpt=res["excerpt"])))
     for k in res["ids"]:
         state.setdefault("posted", {})[k] = args.until.isoformat()
     save_state(args.state, state)
