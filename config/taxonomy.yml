@@ -1,0 +1,62 @@
+# Keyword rules for classify.py. Matching is case-insensitive on word boundaries
+# (phrases allowed). Slugs match the defend.network slugs. Order = tie-break order.
+severity:
+  critical: [actively exploited, zero-day, 0-day, remote code execution, unauthenticated rce, authentication bypass, "cvss 10", "cvss 9", critical vulnerability, emergency directive, mass exploitation]
+  high: [exploited, ransomware, data breach, rce, privilege escalation, backdoor, supply chain, "cvss 8", "cvss 7", high severity, sql injection]
+  medium: [denial of service, information disclosure, phishing, xss, cross-site scripting, medium severity]
+  low: [low severity, minor, hardening]
+
+types:
+  ransomware: [ransomware, ransom, extortion, lockbit, akira, qilin, clop, play ransomware, double extortion, data leak site]
+  zero-day: [zero-day, 0-day, zero day, exploited in the wild, actively exploited, in-the-wild exploitation]
+  phishing: [phishing, spear-phishing, smishing, vishing, credential harvesting, fake login, malicious email, clickfix, business email compromise, bec, invoice fraud, ceo fraud, payment fraud]
+  apt: [apt, nation-state, state-sponsored, espionage, lazarus, apt28, apt29, volt typhoon, salt typhoon, sandworm, threat actor linked to china, north korea, north korean]
+  supply-chain: [supply chain, supply-chain, malicious package, npm package, pypi package, compromised update, trojanized, typosquat, build pipeline, dependency confusion]
+  data-breach: [data breach, breach, leaked data, exposed database, stolen data, data exposure, records exposed, customer data]
+  ddos: [ddos, denial-of-service attack, botnet attack, traffic flood, hyper-volumetric]
+  malware: [malware, trojan, infostealer, stealer, loader, rat, remote access trojan, botnet, wiper, rootkit, backdoor, spyware]
+  mobile-malware: [android malware, ios malware, mobile malware, banking trojan, android trojan, malicious app, mobile spyware, android botnet]
+  vulnerability-exploit: [vulnerability, cve, remote code execution, rce, privilege escalation, authentication bypass, patch, security update, buffer overflow, sql injection, exploit]
+  insider-threat: [insider threat, rogue employee, malicious insider, insider]
+  credential-theft: [credential theft, credential stuffing, stolen credentials, password spraying, session hijack, token theft, infostealer, account takeover, mfa bypass, api keys exposed]
+  iot-ot: [iot, ot security, ics, scada, plc, industrial control, operational technology, router, camera, smart device, firmware]
+  cryptojacking: [cryptojacking, cryptominer, crypto miner, coinminer, xmrig, illicit mining, llmjacking]
+
+industries:
+  healthcare: [healthcare, hospital, health system, patient, medical, pharma, clinic]
+  finance: [bank, banking, financial, fintech, insurance, payment, cryptocurrency exchange, crypto exchange, brokerage]
+  government: [government, federal, ministry, municipal, city council, public sector, state department]
+  technology: [software, saas, cloud, it services, technology company, firmware]
+  energy: [energy, utility, utilities, power grid, oil and gas, pipeline, solar, nuclear]
+  education: [school, university, college, education, student, k-12]
+  retail: [retail, retailer, e-commerce, ecommerce, consumer goods, supermarket]
+  telecom: [telecom, telecommunications, isp, carrier, mobile operator, 5g]
+  media: [media, news outlet, broadcaster, journalism, entertainment]
+  defense: [defense, defence, military, aerospace, armed forces, nato]
+
+# ransomware.live activity labels -> industry slug. Sectors with no defend.network
+# slug (manufacturing, construction, business services, legal, transportation,
+# logistics, agriculture/food) are left out on purpose: cross-industry.
+sector_map:
+  healthcare: healthcare
+  finance: finance
+  "financial services": finance
+  banking: finance
+  insurance: finance
+  government: government
+  "public sector": government
+  technology: technology
+  energy: energy
+  education: education
+  retail: retail
+  "consumer services": retail
+  telecommunication: telecom
+  telecommunications: telecom
+  hospitality: retail
+  media: media
+  defense: defense
+
+limits:
+  max_types_per_item: 3
+  max_industries_per_item: 2
+  max_tags: 10

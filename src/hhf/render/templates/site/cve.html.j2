@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ c.id }}</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:46rem;margin:0 auto;padding:1rem}th{text-align:left;padding-right:1rem}</style>
+</head>
+<body>
+<p><a href="{{ pages_url }}/">All data</a></p>
+<h1>{{ c.id }}</h1>
+<table>
+<tr><th>Product</th><td>{{ c.product }}</td></tr>
+<tr><th>Exploitation</th><td>{{ c.exploitation }}</td></tr>
+<tr><th>Verification</th><td>{{ c.verification }}</td></tr>
+<tr><th>NVD status</th><td>{{ c.status or "n/a" }}</td></tr>
+{% if c.cvss %}
+<tr><th>CVSS</th><td>{{ c.cvss.score }} {{ c.cvss.severity or "" }} (v{{ c.cvss.version }}, {{ c.cvss.source }}) <code>{{ c.cvss.vector or "" }}</code></td></tr>
+{% endif %}
+{% if c.epss %}
+<tr><th>EPSS</th><td>{{ c.epss.score }} (percentile {{ c.epss.percentile }}, {{ c.epss.date }})</td></tr>
+{% endif %}
+{% if c.kev %}
+<tr><th>CISA KEV</th><td>added {{ c.kevDateAdded }}, due {{ c.kevDueDate }}</td></tr>
+{% endif %}
+<tr><th>First seen</th><td>{{ c.firstSeen }}</td></tr>
+<tr><th>Last updated</th><td>{{ c.lastUpdated }}</td></tr>
+</table>
+<h2>References</h2>
+<ul>
+{% for r in c.references if r.startswith("https://") or r.startswith("http://") %}
+<li><a href="{{ r }}" rel="nofollow noopener">{{ r }}</a></li>
+{% endfor %}
+</ul>
+<p><small>{{ m.disclaimer }} Data licensed {{ m.license }} ({{ m.licenseScope }}). {{ m.attribution | join("; ") }}</small></p>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HHF Blog Data</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;max-width:46rem;margin:0 auto;padding:1rem}code{background:#8882;padding:.1em .3em}</style>
+</head>
+<body>
+<h1>HHF threat data</h1>
+<p>Structured data behind the daily threat briefings on <a href="{{ blog_url }}">the HHF blog</a>. {{ n_briefings }} briefings, {{ n_cves }} CVEs. Generated {{ m.generated }}.</p>
+<p><strong>Disclaimer.</strong> {{ m.disclaimer }}</p>
+<h2>Endpoints</h2>
+<ul>
+<li><a href="{{ pages_url }}/api/v1/briefings.json"><code>/api/v1/briefings.json</code></a> last 30 briefings</li>
+<li><a href="{{ pages_url }}/api/v1/cves/latest.json"><code>/api/v1/cves/latest.json</code></a> CVEs updated in the last 7 days</li>
+<li><a href="{{ pages_url }}/api/v1/cves.json"><code>/api/v1/cves.json</code></a> all CVEs</li>
+<li><a href="{{ pages_url }}/feed.xml"><code>/feed.xml</code></a> RSS 2.0</li>
+<li><code>/cve/&lt;id&gt;.html</code> one page per CVE</li>
+</ul>
+<h2>Licence</h2>
+<p>The structured data (JSON files and CVE pages) is licensed <a href="https://creativecommons.org/licenses/by/4.0/">{{ m.license }}</a>: {{ m.licenseScope }}. The article prose is copyright HHF Technology and is not licensed for reuse. Code: MIT, see the <a href="{{ m.source }}">source repository</a>.</p>
+<h2>Attribution</h2>
+<ul>
+{% for a in m.attribution %}
+<li>{{ a }}</li>
+{% endfor %}
+</ul>
+</body>
+</html>

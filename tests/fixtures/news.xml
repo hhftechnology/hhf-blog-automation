@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"><channel><title>Test News</title>
+<item><title>Ransomware gang hits hospital network in a data breach</title><link>https://news.example/hospital</link>
+<pubDate>Sat, 07 Nov 2026 03:00:00 +0000</pubDate><description>&lt;p&gt;A &lt;b&gt;ransomware&lt;/b&gt; attack disrupted a hospital system. Patient data was stolen. More text here.&lt;/p&gt;</description></item>
+<item><title>Old story</title><link>https://news.example/old</link><pubDate>Mon, 01 Jan 2026 03:00:00 +0000</pubDate><description>old</description></item>
+<item><title>Zero-day in Acme VPN exploited in the wild (CVE-2026-1111)</title><link>https://news.example/vpn</link>
+<pubDate>Sat, 07 Nov 2026 04:00:00 +0000</pubDate><description>Attackers exploit a zero-day remote code execution flaw in Acme VPN appliances.</description></item>
+</channel></rss>

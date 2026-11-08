@@ -1,0 +1,23 @@
+### **{{ n }}. {{ it.title | md }}**
+
+{{ it.head }}
+
+**Technical Details** : {{ it.prose | md }}
+
+* **Severity** : {{ it.severity_line }}
+* **Affected** : {{ it.affected | md }}
+* **Fixed** : {{ it.fixed | md }}
+* **Workaround** : {{ it.workaround | md }}
+
+| CVE | CVSS | Exploitation | EPSS | Action |
+|---|---|---|---|---|
+{% for r in it.rows %}
+| {{ r.cve }} | {{ r.cvss }} | {{ r.exploitation }} | {{ r.epss }} | {{ r.action }} |
+{% endfor %}
+
+**Remediation Steps** : {{ it.steps_line | md }}
+
+**Reference** : {{ it.reference_line }}
+
+---
+

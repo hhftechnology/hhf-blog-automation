@@ -1,0 +1,23 @@
+Data licence
+
+Copyright (c) 2026 HHF Technology
+
+The structured data in this repository (the files in data/) and the public API
+and CVE pages built from it (api/v1/*.json, cve/*.html on GitHub Pages) are
+licensed under the Creative Commons Attribution 4.0 International licence
+(CC BY 4.0):
+
+    https://creativecommons.org/licenses/by/4.0/legalcode
+
+You may share and adapt the data for any purpose, including commercially, if you
+give appropriate credit, link to the licence and indicate if changes were made.
+Credit "HHF Technology" and keep the attribution listed in the "meta.attribution"
+field of every API response (NVD, CISA KEV, FIRST EPSS).
+
+Scope: derived structured data only. The prose of the published articles
+(daily threat briefings and weekly advisories on the HHF blog) is copyright
+HHF Technology and is NOT licensed under CC BY 4.0. The source code is licensed
+separately under the MIT licence (see LICENSE).
+
+The data is AI-assisted, published automatically and not human-reviewed.
+Verify with vendors before acting. It comes with no warranty.

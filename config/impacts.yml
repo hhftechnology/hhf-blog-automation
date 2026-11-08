@@ -1,0 +1,16 @@
+# Impact keywords used to build short "<Component>: <Impact>" titles for advisories that only have a long
+# NVD description. The first two distinct matches (in file order) are used. Case-insensitive regexes.
+impacts:
+- {pattern: "remote code execution|arbitrary code|\\bRCE\\b|execute (?:arbitrary )?(?:code|commands?)|os command|command execution|TO PROGRAM|operating-system account|run (?:arbitrary )?(?:os )?commands", label: "Remote Code Execution"}
+- {pattern: "command injection|shell metacharacter", label: "Command Injection"}
+- {pattern: "sql injection", label: "SQL Injection"}
+- {pattern: "authentication bypass|bypass(?:es)? authentication|authorization bypass|access control bypass|improper authentication|without authentication", label: "Authentication Bypass"}
+- {pattern: "privilege escalation|escalat\\w+ privileges?|elevat\\w+ privileges?", label: "Privilege Escalation"}
+- {pattern: "account takeover|take over (?:any |an )?account", label: "Account Takeover"}
+- {pattern: "cross-site scripting|\\bXSS\\b", label: "XSS"}
+- {pattern: "server-side request forgery|\\bSSRF\\b", label: "SSRF"}
+- {pattern: "path traversal|directory traversal|arbitrary file (?:read|write|upload)", label: "Path Traversal"}
+- {pattern: "denial of service|\\bDoS\\b|crash|resource exhaustion|memory exhaustion", label: "Denial of Service"}
+- {pattern: "information disclosure|sensitive information|disclos\\w+ (?:of )?(?:sensitive|credentials)|credentials? (?:leak|exposure)", label: "Information Disclosure"}
+- {pattern: "injection", label: "Injection"}
+- {pattern: "buffer overflow|heap overflow|out-of-bounds|memory corruption|use-after-free", label: "Memory Corruption"}

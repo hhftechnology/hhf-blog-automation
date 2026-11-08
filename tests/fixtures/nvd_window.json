@@ -1,0 +1,14 @@
+{"resultsPerPage":3,"startIndex":0,"totalResults":3,"vulnerabilities":[
+ {"cve":{"id":"CVE-2026-1111","published":"2026-11-04T09:00:00.000","vulnStatus":"Analyzed",
+   "descriptions":[{"lang":"en","value":"Keycloak accepts tokens signed with an unexpected algorithm."}],
+   "metrics":{"cvssMetricV31":[{"type":"Primary","cvssData":{"baseScore":9.8,"baseSeverity":"CRITICAL","vectorString":"CVSS:3.1/AV:N"}}]},
+   "configurations":[{"nodes":[{"cpeMatch":[{"vulnerable":true,"criteria":"cpe:2.3:a:redhat:keycloak:*:*:*:*:*:*:*:*"}]}]}],
+   "references":[{"url":"https://github.com/keycloak/keycloak/security/advisories/GHSA-aaaa-bbbb-cccc","tags":["Vendor Advisory"]}]}},
+ {"cve":{"id":"CVE-2026-4444","published":"2026-11-05T09:00:00.000","vulnStatus":"Awaiting Analysis",
+   "descriptions":[{"lang":"en","value":"Nextcloud Server allows remote code execution through a crafted file name."}],
+   "metrics":{"cvssMetricV31":[{"type":"Primary","cvssData":{"baseScore":8.8,"baseSeverity":"HIGH"}}]},
+   "configurations":[{"nodes":[{"cpeMatch":[{"vulnerable":true,"criteria":"cpe:2.3:a:nextcloud:nextcloud_server:*:*:*:*:*:*:*:*"}]}]}],
+   "references":[{"url":"https://example.org/exploit","tags":["Exploit"]}]}},
+ {"cve":{"id":"CVE-2026-5555","published":"2026-11-05T09:00:00.000","descriptions":[{"lang":"en","value":"Some unrelated router firmware flaw."}],
+   "metrics":{"cvssMetricV31":[{"type":"Primary","cvssData":{"baseScore":9.0,"baseSeverity":"CRITICAL"}}]},"references":[]}}
+]}

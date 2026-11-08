@@ -1,0 +1,104 @@
+**#{{ number }} · {{ date }} · Severity: {{ overall | capitalize }}**
+
+**Threat types:** {{ type_tags | join(", ") if type_tags else "general" }} · **Industries:** {{ industry_tags | join(", ") if industry_tags else "cross-industry" }}
+
+## Verified status
+
+{% if verified %}
+| CVE | CVSS | Vendor/product | Exploitation | References |
+|---|---|---|---|---|
+{% for v in verified %}
+| {{ v.id }} | {{ v.cvss }} | {{ v.product | cell }} | {{ v.exploitation }} | {% for name, url in v.links %}[{{ name }}]({{ url }}){{ " · " if not loop.last }}{% endfor %} |
+{% endfor %}
+{% else %}
+No CVEs were tracked in this window.
+{% endif %}
+
+*Checked against NVD and CISA KEV on {{ date }}.*
+
+## TL;DR
+
+{% for b in tldr %}
+- {{ b | md }}
+{% endfor %}
+
+## Executive summary
+
+{{ executive | md }}
+
+## Top threats
+
+{% for t in threats %}
+### {{ loop.index }}. {{ t.title | md }}
+
+**Severity:** {{ t.severity | capitalize }} | **Type:** {{ t.types | join(", ") if t.types else "general" }} | **Industry:** {{ t.industries | join(", ") if t.industries else "cross-industry" }}
+
+{% if t.summary %}
+{{ t.summary | md }}
+
+{% endif %}
+{% if t.read_more %}
+Read the full report at [{{ t.source | cell }}]({{ t.url }}).
+
+{% endif %}
+**Sources:** [{{ t.source | cell }}]({{ t.url }}){% for s, u in t.also %} · [{{ s | cell }}]({{ u }}){% endfor %}
+
+
+**Recommended actions:**
+
+{% for a in t.actions %}
+- {{ a | md }}
+{% endfor %}
+
+{% endfor %}
+{% if not threats %}
+No notable threats were identified in this window.
+
+{% endif %}
+## Ongoing: previously reported
+
+{% if ongoing %}
+| CVE | Vendor/product | CVSS | KEV due date | First reported |
+|---|---|---|---|---|
+{% for c in ongoing %}
+| {{ c.id }} | {{ c.product | cell }} | {{ c.cvss }} | {{ c.due }} | {{ c.first_seen }} |
+{% endfor %}
+{% else %}
+No earlier KEV items are still inside their remediation window.
+{% endif %}
+
+## Today's action checklist
+
+{% for a in checklist %}
+- [ ] {{ a | md }}
+{% endfor %}
+
+## Indicators
+
+{% if ransomware %}
+{{ ransomware_total }} new ransomware victims were listed in this window.
+
+| Sector | Victims | Most active groups |
+|---|---|---|
+{% for s in ransomware %}
+| {{ s.sector | cell }} | {{ s.count }} | {{ s.groups | join(", ") | cell }} |
+{% endfor %}
+
+{% endif %}
+{% if ioc_counts %}
+Raw indicators are not republished here. Pull them from the source pages.
+
+{% for i in ioc_counts %}
+- {{ i.source }}: {{ i.count }} {{ i.what }} ([view on {{ i.host }}](https://{{ i.host }}))
+{% endfor %}
+{% else %}
+{{ ioc_note }}
+{% endif %}
+
+## Sources
+
+{% for s in sources %}
+- {{ s }}
+{% endfor %}
+
+*AI-assisted, published automatically, not human-reviewed; verify with vendors before acting.*

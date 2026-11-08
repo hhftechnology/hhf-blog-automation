@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+<channel>
+<title>HHF Daily Threat Briefings</title>
+<link>{{ blog_url }}</link>
+<description>AI-assisted daily threat briefings. Not human-reviewed; verify with vendors before acting.</description>
+<lastBuildDate>{{ built }}</lastBuildDate>
+{% for b in items %}
+<item>
+<title>{{ b.title }}</title>
+<link>{{ b.url }}</link>
+<guid isPermaLink="true">{{ b.url }}</guid>
+<pubDate>{{ b.pubdate }}</pubDate>
+<description>#{{ b.number }}. Severity: {{ b.severity }}. Threats: {{ b.threats | join(", ") }}. Industries: {{ b.industries | join(", ") }}.</description>
+</item>
+{% endfor %}
+</channel>
+</rss>

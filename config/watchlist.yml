@@ -1,0 +1,735 @@
+# Watchlist of popular self-hosted projects for the weekly advisory.
+# repo      -> GitHub owner/repo (GHSA source_code_location match, releases, repo advisories)
+# image     -> container image used in the generated upgrade command (optional)
+# packages  -> GHSA ecosystem + package name (ecosystem names as used by GitHub: go, npm, pip, ...)
+# nvd       -> CPE vendors and description keywords (case-insensitive, word boundary)
+# category  -> edge | identity | platform | app | data (edge items are listed first in the intro)
+# kev       -> CISA KEV vendorProject/product aliases; a KEV entry is attributed to this project only on a match
+# group     -> optional; projects sharing a group are merged into one numbered item (e.g. Incus & LXD)
+projects:
+- name: Traefik
+  kev:
+  - {vendor: "Traefik Labs", product: "Traefik"}
+  category: edge
+  repo: traefik/traefik
+  image: traefik
+  packages:
+  - ecosystem: go
+    name: github.com/traefik/traefik/v3
+  - ecosystem: go
+    name: github.com/traefik/traefik/v2
+  nvd:
+    vendors:
+    - traefik
+    - traefik_labs
+    keywords:
+    - traefik
+- name: Caddy
+  kev:
+  - {product: "Caddy"}
+  category: edge
+  repo: caddyserver/caddy
+  image: caddy
+  packages:
+  - ecosystem: go
+    name: github.com/caddyserver/caddy/v2
+  nvd:
+    vendors:
+    - caddyserver
+    - caddy
+    keywords:
+    - caddy
+- name: nginx
+  kev:
+  - {product: "nginx"}
+  category: edge
+  ubuntu_packages: [nginx]
+  ubuntu_service: nginx
+  repo: nginx/nginx
+  image: nginx
+  nvd:
+    vendors:
+    - nginx
+    - f5
+    keywords:
+    - nginx
+- name: Pangolin
+  kev:
+  - {product: "Pangolin"}
+  category: edge
+  repo: fosrl/pangolin
+  image: fosrl/pangolin
+  nvd:
+    vendors:
+    - fossorial
+    - fosrl
+    keywords:
+    - pangolin
+- name: CrowdSec
+  kev:
+  - {product: "CrowdSec"}
+  category: edge
+  repo: crowdsecurity/crowdsec
+  image: crowdsecurity/crowdsec
+  packages:
+  - ecosystem: go
+    name: github.com/crowdsecurity/crowdsec
+  nvd:
+    vendors:
+    - crowdsec
+    - crowdsecurity
+    keywords:
+    - crowdsec
+- name: OpenSSH
+  kev:
+  - {product: "OpenSSH"}
+  category: edge
+  vendor: OpenSSH
+  ubuntu_packages: [openssh]
+  ubuntu_service: ssh
+  repo: openssh/openssh-portable
+  nvd:
+    vendors:
+    - openssh
+    keywords:
+    - openssh
+- name: BIND
+  kev:
+  - {product: "BIND"}
+  category: edge
+  vendor: ISC
+  ubuntu_packages: [bind9]
+  ubuntu_service: named
+  repo: isc-projects/bind9
+  image: internetsystemsconsortium/bind9
+  nvd:
+    vendors:
+    - isc
+    keywords:
+    - bind
+- name: Keycloak
+  kev:
+  - {vendor: "Red Hat", product: "Keycloak"}
+  category: identity
+  repo: keycloak/keycloak
+  image: keycloak/keycloak
+  packages:
+  - ecosystem: maven
+    name: org.keycloak:keycloak-services
+  nvd:
+    vendors:
+    - redhat
+    - keycloak
+    keywords:
+    - keycloak
+- name: Authentik
+  kev:
+  - {product: "Authentik"}
+  category: identity
+  repo: goauthentik/authentik
+  image: ghcr.io/goauthentik/server
+  packages:
+  - ecosystem: pip
+    name: authentik
+  nvd:
+    vendors:
+    - goauthentik
+    - authentik
+    keywords:
+    - authentik
+- name: Vaultwarden
+  kev:
+  - {product: "Vaultwarden"}
+  category: identity
+  repo: dani-garcia/vaultwarden
+  image: vaultwarden/server
+  nvd:
+    vendors:
+    - vaultwarden
+    - bitwarden
+    keywords:
+    - vaultwarden
+- name: Nextcloud
+  kev:
+  - {product: "Nextcloud"}
+  category: app
+  repo: nextcloud/server
+  image: nextcloud
+  packages:
+  - ecosystem: composer
+    name: nextcloud/server
+  nvd:
+    vendors:
+    - nextcloud
+    keywords:
+    - nextcloud
+- name: Immich
+  kev:
+  - {product: "Immich"}
+  category: app
+  repo: immich-app/immich
+  image: ghcr.io/immich-app/immich-server
+  packages:
+  - ecosystem: npm
+    name: immich
+  nvd:
+    vendors:
+    - immich-app
+    - immich
+    keywords:
+    - immich
+- name: Jellyfin
+  kev:
+  - {product: "Jellyfin"}
+  category: app
+  repo: jellyfin/jellyfin
+  image: jellyfin/jellyfin
+  packages:
+  - ecosystem: nuget
+    name: Jellyfin.Server
+  nvd:
+    vendors:
+    - jellyfin
+    keywords:
+    - jellyfin
+- name: Plex
+  kev:
+  - {product: "Plex"}
+  category: app
+  repo: plexinc/pms-docker
+  image: plexinc/pms-docker
+  nvd:
+    vendors:
+    - plex
+    keywords:
+    - plex media server
+    - plex
+- name: Gitea
+  kev:
+  - {product: "Gitea"}
+  category: platform
+  repo: go-gitea/gitea
+  image: gitea/gitea
+  packages:
+  - ecosystem: go
+    name: code.gitea.io/gitea
+  nvd:
+    vendors:
+    - gitea
+    keywords:
+    - gitea
+- name: Forgejo
+  kev:
+  - {product: "Forgejo"}
+  category: platform
+  image: codeberg.org/forgejo/forgejo
+  packages:
+  - ecosystem: go
+    name: code.forgejo.org/forgejo/forgejo
+  nvd:
+    vendors:
+    - forgejo
+    - codeberg
+    keywords:
+    - forgejo
+- name: Home Assistant
+  kev:
+  - {product: "Home Assistant"}
+  category: app
+  repo: home-assistant/core
+  image: ghcr.io/home-assistant/home-assistant
+  packages:
+  - ecosystem: pip
+    name: homeassistant
+  nvd:
+    vendors:
+    - home-assistant
+    - homeassistant
+    keywords:
+    - home assistant
+- name: Portainer
+  kev:
+  - {product: "Portainer"}
+  category: platform
+  repo: portainer/portainer
+  image: portainer/portainer-ce
+  packages:
+  - ecosystem: go
+    name: github.com/portainer/portainer
+  nvd:
+    vendors:
+    - portainer
+    keywords:
+    - portainer
+- name: Proxmox
+  kev:
+  - {product: "Proxmox"}
+  category: platform
+  nvd:
+    vendors:
+    - proxmox
+    keywords:
+    - proxmox
+- name: WordPress
+  kev:
+  - {vendor: "WordPress", product: "WordPress"}
+  - {vendor: "WordPress", product: "WordPress Core"}
+  category: app
+  releases: {type: wordpress_api}  # https://api.wordpress.org/core/version-check/1.7/ lists current releases per branch
+  repo: WordPress/WordPress
+  image: wordpress
+  packages:
+  - ecosystem: composer
+    name: johnpbloch/wordpress-core
+  nvd:
+    vendors:
+    - wordpress
+    keywords:
+    - wordpress
+    exclude:
+    - \bplugins?\b
+    - \bthemes?\b
+    - \bwoocommerce\b
+- name: pgAdmin 4
+  kev:
+  - {product: "pgAdmin 4"}
+  category: data
+  repo: pgadmin-org/pgadmin4
+  image: dpage/pgadmin4
+  packages:
+  - ecosystem: pip
+    name: pgadmin4
+  nvd:
+    vendors:
+    - postgresql
+    - pgadmin
+    keywords:
+    - pgadmin
+- name: Grafana
+  kev:
+  - {product: "Grafana"}
+  category: platform
+  repo: grafana/grafana
+  image: grafana/grafana
+  packages:
+  - ecosystem: go
+    name: github.com/grafana/grafana
+  nvd:
+    vendors:
+    - grafana
+    - grafana_labs
+    keywords:
+    - grafana
+- name: Uptime Kuma
+  kev:
+  - {product: "Uptime Kuma"}
+  category: platform
+  repo: louislam/uptime-kuma
+  image: louislam/uptime-kuma
+  packages:
+  - ecosystem: npm
+    name: uptime-kuma
+  nvd:
+    vendors:
+    - louislam
+    - uptime_kuma
+    keywords:
+    - uptime kuma
+- name: Incus
+  kev:
+  - {product: "Incus"}
+  category: platform
+  group: Incus & LXD
+  repo: lxc/incus
+  packages:
+  - ecosystem: go
+    name: github.com/lxc/incus
+  nvd:
+    vendors:
+    - linuxcontainers
+    - incus
+    keywords:
+    - incus
+- name: LXD
+  kev:
+  - {product: "LXD"}
+  category: platform
+  group: Incus & LXD
+  repo: canonical/lxd
+  packages:
+  - ecosystem: go
+    name: github.com/canonical/lxd
+  nvd:
+    vendors:
+    - canonical
+    - linuxcontainers
+    keywords:
+    - lxd
+- name: Docker Desktop
+  kev:
+  - {product: "Docker Desktop"}
+  category: app
+  nvd:
+    vendors:
+    - docker
+    keywords:
+    - docker desktop
+- name: Docker
+  kev:
+  - {product: "Docker"}
+  category: platform
+  repo: moby/moby
+  image: docker
+  packages:
+  - ecosystem: go
+    name: github.com/docker/docker
+  - ecosystem: go
+    name: github.com/moby/moby
+  nvd:
+    vendors:
+    - docker
+    - mobyproject
+    keywords:
+    - docker
+- name: Synapse
+  kev:
+  - {product: "Synapse"}
+  category: app
+  repo: element-hq/synapse
+  image: matrixdotorg/synapse
+  packages:
+  - ecosystem: pip
+    name: matrix-synapse
+  nvd:
+    vendors:
+    - matrix
+    - element
+    keywords:
+    - synapse
+- name: Mastodon
+  kev:
+  - {product: "Mastodon"}
+  category: app
+  repo: mastodon/mastodon
+  image: ghcr.io/mastodon/mastodon
+  packages:
+  - ecosystem: rubygems
+    name: mastodon
+  nvd:
+    vendors:
+    - joinmastodon
+    - mastodon
+    keywords:
+    - mastodon
+- name: Paperless-ngx
+  kev:
+  - {product: "Paperless-ngx"}
+  category: app
+  repo: paperless-ngx/paperless-ngx
+  image: ghcr.io/paperless-ngx/paperless-ngx
+  packages:
+  - ecosystem: pip
+    name: paperless-ngx
+  nvd:
+    vendors:
+    - paperless-ngx
+    keywords:
+    - paperless-ngx
+    - paperless
+- name: n8n
+  kev:
+  - {product: "n8n"}
+  category: app
+  repo: n8n-io/n8n
+  image: n8nio/n8n
+  packages:
+  - ecosystem: npm
+    name: n8n
+  nvd:
+    vendors:
+    - n8n
+    keywords:
+    - n8n
+- name: Pi-hole
+  kev:
+  - {product: "Pi-hole"}
+  category: edge
+  repo: pi-hole/pi-hole
+  image: pihole/pihole
+  nvd:
+    vendors:
+    - pi-hole
+    keywords:
+    - pi-hole
+- name: AdGuard Home
+  kev:
+  - {product: "AdGuard Home"}
+  category: edge
+  repo: AdguardTeam/AdGuardHome
+  image: adguard/adguardhome
+  packages:
+  - ecosystem: go
+    name: github.com/AdguardTeam/AdGuardHome
+  nvd:
+    vendors:
+    - adguard
+    keywords:
+    - adguard home
+- name: Nginx Proxy Manager
+  kev:
+  - {product: "Nginx Proxy Manager"}
+  category: edge
+  repo: NginxProxyManager/nginx-proxy-manager
+  image: jc21/nginx-proxy-manager
+  packages:
+  - ecosystem: npm
+    name: nginx-proxy-manager
+  nvd:
+    vendors:
+    - nginxproxymanager
+    keywords:
+    - nginx proxy manager
+- name: WireGuard
+  kev:
+  - {product: "WireGuard"}
+  category: edge
+  repo: WireGuard/wireguard-tools
+  nvd:
+    vendors:
+    - wireguard
+    keywords:
+    - wireguard
+- name: Tailscale
+  kev:
+  - {product: "Tailscale"}
+  category: edge
+  repo: tailscale/tailscale
+  image: tailscale/tailscale
+  packages:
+  - ecosystem: go
+    name: tailscale.com
+  nvd:
+    vendors:
+    - tailscale
+    keywords:
+    - tailscale
+- name: Vault
+  kev:
+  - {product: "Vault"}
+  category: identity
+  repo: hashicorp/vault
+  image: hashicorp/vault
+  packages:
+  - ecosystem: go
+    name: github.com/hashicorp/vault
+  nvd:
+    vendors:
+    - hashicorp
+    keywords:
+    - hashicorp vault
+- name: Sonarr
+  kev:
+  - {product: "Sonarr"}
+  category: app
+  repo: Sonarr/Sonarr
+  nvd:
+    vendors:
+    - sonarr
+    keywords:
+    - sonarr
+- name: Radarr
+  kev:
+  - {product: "Radarr"}
+  category: app
+  repo: Radarr/Radarr
+  nvd:
+    vendors:
+    - radarr
+    keywords:
+    - radarr
+- name: Ollama
+  kev:
+  - {product: "Ollama"}
+  category: app
+  repo: ollama/ollama
+  image: ollama/ollama
+  packages:
+  - ecosystem: go
+    name: github.com/ollama/ollama
+  nvd:
+    vendors:
+    - ollama
+    keywords:
+    - ollama
+- name: Open WebUI
+  kev:
+  - {product: "Open WebUI"}
+  category: app
+  repo: open-webui/open-webui
+  image: ghcr.io/open-webui/open-webui
+  packages:
+  - ecosystem: pip
+    name: open-webui
+  nvd:
+    vendors:
+    - openwebui
+    - open-webui
+    keywords:
+    - open webui
+- name: GitLab
+  kev:
+  - {vendor: "GitLab", product: "GitLab"}
+  category: platform
+  repo: gitlabhq/gitlabhq
+  image: gitlab/gitlab-ce
+  nvd:
+    vendors:
+    - gitlab
+    keywords:
+    - gitlab
+- name: Jenkins
+  kev:
+  - {vendor: "Jenkins", product: "Jenkins"}
+  category: platform
+  repo: jenkinsci/jenkins
+  image: jenkins/jenkins
+  packages:
+  - ecosystem: maven
+    name: org.jenkins-ci.main:jenkins-core
+  nvd:
+    vendors:
+    - jenkins
+    - jenkins_ci
+    keywords:
+    - jenkins
+- name: Node-RED
+  kev:
+  - {product: "Node-RED"}
+  category: app
+  repo: node-red/node-red
+  image: nodered/node-red
+  packages:
+  - ecosystem: npm
+    name: node-red
+  nvd:
+    vendors:
+    - nodered
+    - node-red
+    keywords:
+    - node-red
+- name: Discourse
+  kev:
+  - {product: "Discourse"}
+  category: app
+  repo: discourse/discourse
+  image: discourse/discourse
+  packages:
+  - ecosystem: rubygems
+    name: discourse
+  nvd:
+    vendors:
+    - discourse
+    keywords:
+    - discourse
+- name: HAProxy
+  kev:
+  - {product: "HAProxy"}
+  category: edge
+  repo: haproxy/haproxy
+  image: haproxy
+  ubuntu_packages: [haproxy]
+  ubuntu_service: haproxy
+  nvd:
+    vendors:
+    - haproxy
+    keywords:
+    - haproxy
+- name: OPNsense
+  kev:
+  - {product: "OPNsense"}
+  category: edge
+  repo: opnsense/core
+  nvd:
+    vendors:
+    - opnsense
+    keywords:
+    - opnsense
+- name: vsftpd
+  kev:
+  - {product: "vsftpd"}
+  category: edge
+  nvd:
+    vendors:
+    - vsftpd_project
+    - vsftpd
+    keywords:
+    - vsftpd
+- name: Langflow
+  kev:
+  - {product: "Langflow"}
+  category: app
+  repo: langflow-ai/langflow
+  image: langflowai/langflow
+  packages:
+  - ecosystem: pip
+    name: langflow
+  - ecosystem: pip
+    name: langflow-base
+  nvd:
+    vendors:
+    - langflow
+    - langflow-ai
+    keywords:
+    - langflow
+- name: ClickHouse
+  kev:
+  - {product: "ClickHouse"}
+  category: data
+  repo: ClickHouse/ClickHouse
+  image: clickhouse/clickhouse-server
+  nvd:
+    vendors:
+    - clickhouse
+    keywords:
+    - clickhouse
+- name: imgproxy
+  kev:
+  - {product: "imgproxy"}
+  category: app
+  repo: imgproxy/imgproxy
+  image: darthsim/imgproxy
+  packages:
+  - ecosystem: go
+    name: github.com/imgproxy/imgproxy/v3
+  nvd:
+    vendors:
+    - imgproxy
+    keywords:
+    - imgproxy
+- name: Flowise
+  kev:
+  - {product: "Flowise"}
+  category: app
+  repo: FlowiseAI/Flowise
+  image: flowiseai/flowise
+  packages:
+  - ecosystem: npm
+    name: flowise
+  nvd:
+    vendors:
+    - flowiseai
+    keywords:
+    - flowise
+- name: Frappe
+  kev:
+  - {product: "Frappe"}
+  category: app
+  repo: frappe/frappe
+  packages:
+  - ecosystem: pip
+    name: frappe
+  nvd:
+    vendors:
+    - frappe
+    keywords:
+    - frappe

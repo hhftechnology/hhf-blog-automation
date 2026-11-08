@@ -1,0 +1,35 @@
+{{ intro | md }}
+
+---
+
+{% for it in items %}
+{% with n = loop.index %}
+{% include "_item.md.j2" %}
+{% endwith %}
+{% endfor %}
+## **Key Takeaways This Week**
+
+{% for b in takeaways %}
+* {{ b | md }}
+{% endfor %}
+
+**Recommendation** : Review your self-hosted stack this weekend and prioritize upgrades for any of the above projects you’re running.
+
+Stay secure!
+
+*Questions or need config help? Post in [Help](https://forum.hhf.technology/c/help/85).*
+
+---
+
+{% if missed %}
+## **Missed Earlier**
+
+These came out before this week and weren’t in an earlier summary. They only reached the GitHub global advisory database this week.
+
+{% for it in missed %}
+{% with n = items | length + loop.index %}
+{% include "_item.md.j2" %}
+{% endwith %}
+{% endfor %}
+{% endif %}
+{{ data_line }}

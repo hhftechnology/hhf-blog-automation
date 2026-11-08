@@ -1,0 +1,13 @@
+# News and advisory RSS/Atom feeds for daily.py. All verified to return HTTP 200 on 2026-11-07.
+# Only headline + link + our own short summary are shown; full articles are never republished.
+news:
+  - {name: BleepingComputer, url: "https://www.bleepingcomputer.com/feed/"}
+  - {name: The Hacker News, url: "https://feeds.feedburner.com/TheHackersNews"}
+  - {name: SecurityWeek, url: "https://feeds.feedburner.com/securityweek"}
+  - {name: The Record, url: "https://therecord.media/feed"}
+  - {name: Krebs on Security, url: "https://krebsonsecurity.com/feed/"}
+  - {name: NCSC UK, url: "https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml"}
+  - {name: CERT-EU, url: "https://cert.europa.eu/publications/security-advisories-rss"}
+advisories:
+  - {name: CISA Advisories, url: "https://www.cisa.gov/cybersecurity-advisories/all.xml", kind: cisa}
+  - {name: CISA ICS Advisories, url: "https://www.cisa.gov/cybersecurity-advisories/ics-advisories.xml", kind: ics}

@@ -1,0 +1,20 @@
+[
+ {"ghsa_id":"GHSA-xv5x-242w-7hf7","cve_id":null,"html_url":"https://github.com/traefik/traefik/security/advisories/GHSA-xv5x-242w-7hf7",
+  "summary":"Traefik: Unauthenticated NTLM/Negotiate Header Exhausts Memory and FDs",
+  "description":"### Summary\n\nAn unauthenticated client can send NTLM/Negotiate headers that leak a backend transport per connection.\n\n### Workarounds\n\nDisable the Negotiate header at the edge.\n",
+  "severity":"high","cvss":{"score":7.5},"published_at":"2026-11-02T10:00:00Z","source_code_location":"https://github.com/traefik/traefik",
+  "vulnerabilities":[{"package":{"ecosystem":"go","name":"github.com/traefik/traefik/v3"},"vulnerable_version_range":">= 3.0.0, < 3.6.2","first_patched_version":"3.6.2"}],
+  "references":["https://github.com/traefik/traefik/security/advisories/GHSA-xv5x-242w-7hf7"],"withdrawn_at":null},
+ {"ghsa_id":"GHSA-aaaa-bbbb-cccc","cve_id":"CVE-2026-1111","html_url":"https://github.com/advisories/GHSA-aaaa-bbbb-cccc",
+  "summary":"Keycloak authentication bypass via jwt algorithm confusion",
+  "description":"Keycloak accepts tokens signed with an unexpected algorithm.\n\n### PoC\n\ncurl ...\n",
+  "severity":"critical","cvss":{"score":9.8},"published_at":"2026-11-04T08:00:00Z","source_code_location":"https://github.com/keycloak/keycloak",
+  "vulnerabilities":[{"package":{"ecosystem":"maven","name":"org.keycloak:keycloak-services"},"vulnerable_version_range":"< 26.8.2","first_patched_version":"26.8.2"}],
+  "references":[],"withdrawn_at":null},
+ {"ghsa_id":"GHSA-dddd-eeee-ffff","cve_id":"CVE-2026-2222","html_url":"https://github.com/advisories/GHSA-dddd-eeee-ffff",
+  "summary":"Unrelated library flaw","description":"x","severity":"high","cvss":{"score":8.0},"published_at":"2026-11-03T08:00:00Z",
+  "source_code_location":"https://github.com/someone/else","vulnerabilities":[{"package":{"ecosystem":"npm","name":"left-pad"},"vulnerable_version_range":"< 2","first_patched_version":"2.0.0"}],"references":[],"withdrawn_at":null},
+ {"ghsa_id":"GHSA-gggg-hhhh-iiii","cve_id":"CVE-2026-3333","html_url":"https://github.com/advisories/GHSA-gggg-hhhh-iiii",
+  "summary":"Grafana older issue","description":"Older flaw in Grafana.","severity":"high","cvss":{"score":8.1},"published_at":"2026-10-20T08:00:00Z",
+  "source_code_location":"https://github.com/grafana/grafana","vulnerabilities":[{"package":{"ecosystem":"go","name":"github.com/grafana/grafana"},"vulnerable_version_range":"< 12.1.0","first_patched_version":"12.1.0"}],"references":[],"withdrawn_at":null}
+]
