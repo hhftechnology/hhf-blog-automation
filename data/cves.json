@@ -1,4 +1,27 @@
 {
+  "CVE-2026-107331": {
+    "cvss": {
+      "score": 9.9,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-09",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-09",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-107331",
+      "https://www.ibm.com/support/pages/node/7294270"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-123549": {
     "cvss": {
       "score": 9.3,
@@ -97,6 +120,80 @@
       "https://www.tenda.com.cn/"
     ],
     "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-15266": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-09",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-09",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-15266",
+      "https://www.ibm.com/support/pages/node/7294607"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-19868": {
+    "cvss": {
+      "score": 7.5,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:C/C:H/I:L/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-08",
+      "percentile": 0.50046,
+      "score": 0.00621
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-09",
+    "kev": true,
+    "kevDateAdded": "2026-11-06",
+    "kevDueDate": "2026-11-20",
+    "lastUpdated": "2026-11-09",
+    "product": "SonicWall SonicOS SSLVPN",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-19868",
+      "https://psirt.global.sonicwall.com/vuln-detail/SNWLID-2026-0014",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-19868"
+    ],
+    "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-6715": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-09",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-09",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-6715",
+      "https://www.ibm.com/support/pages/node/7294607"
+    ],
+    "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   }
 }
