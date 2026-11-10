@@ -38,5 +38,27 @@
       "ransomware"
     ],
     "title": "Daily Threat Briefing: Monday, November 9, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-102895",
+      "CVE-2026-116779",
+      "CVE-2026-123218",
+      "CVE-2026-123158",
+      "CVE-2026-120017",
+      "CVE-2026-76964",
+      "CVE-2026-89103",
+      "CVE-2026-125350"
+    ],
+    "date": "2026-11-10",
+    "industries": [],
+    "number": 3,
+    "public_path": "/daily-threat-briefing-tuesday-november-10-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "zero-day"
+    ],
+    "title": "Daily Threat Briefing: Tuesday, November 10, 2026"
   }
 ]
