@@ -119,6 +119,53 @@
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2026-108186": {
+    "cvss": {
+      "score": 9.6,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-108186",
+      "https://www.zoom.com/en/trust/security-bulletin/zsb-26023"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-110697": {
+    "cvss": {
+      "score": 9.9,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-110697",
+      "https://access.redhat.com/security/cve/CVE-2026-110697",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2552237"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-111560": {
     "cvss": {
       "score": 8.6,
@@ -252,6 +299,53 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-116779"
     ],
     "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-118383": {
+    "cvss": {
+      "score": 9.5,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-118383",
+      "https://jira.mongodb.org/browse/SERVER-138119",
+      "https://jira.mongodb.org/browse/SERVER-138175"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-119618": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-119618",
+      "https://httpd.apache.org/security/vulnerabilities_24.html",
+      "http://www.openwall.com/lists/oss-security/2026/11/11/13",
+      "https://access.redhat.com/security/cve/cve-2026-119618",
+      "https://bugs.gentoo.org/986161",
+      "https://github.com/AlmaLinux/updates/issues/4252",
+      "https://github.com/microsoft/azurelinux/pull/20165",
+      "https://www.wiz.io/blog/cve-2026-119618-rce-apache-http-server-vulnerability"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   },
   "CVE-2026-120002": {
@@ -458,6 +552,30 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2026-123710": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123710",
+      "https://access.redhat.com/security/cve/CVE-2026-123710",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2568072"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-123966": {
     "cvss": {
       "score": 9.3,
@@ -533,6 +651,29 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-125350"
     ],
     "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-126325": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:Y/R:X/V:X/RE:M/U:Amber",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "source-reported",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-126325",
+      "https://www.ptc.com/en/support/article/CS483249"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   },
   "CVE-2026-15266": {
@@ -636,6 +777,29 @@
       "https://www.ibm.com/support/pages/node/7294607"
     ],
     "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-76954": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-12",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-12",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-76954",
+      "https://www.synology.com/en-global/security/advisory/Synology_SA_26_19"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   },
   "CVE-2026-76964": {
