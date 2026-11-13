@@ -110,5 +110,26 @@
       "vulnerability-exploit"
     ],
     "title": "Daily Threat Briefing: Thursday, November 12, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-119077",
+      "CVE-2026-125055",
+      "CVE-2026-126378",
+      "CVE-2026-120868",
+      "CVE-2026-123039"
+    ],
+    "date": "2026-11-13",
+    "industries": [
+      "technology"
+    ],
+    "number": 6,
+    "public_path": "/daily-threat-briefing-friday-november-13-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "zero-day"
+    ],
+    "title": "Daily Threat Briefing: Friday, November 13, 2026"
   }
 ]

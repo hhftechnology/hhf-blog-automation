@@ -325,6 +325,36 @@
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2026-119077": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-13",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-13",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-119077",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-ajax-functions-two.php#L156",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-ajax-functions-two.php#L265",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-ajax-functions.php#L946",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-init-handler.php#L529",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-public-functions.php#L627",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/includes/class-crm-public-functions.php#L822",
+      "https://plugins.trac.wordpress.org/browser/elex-helpdesk-customer-support-ticket-system/tags/3.3.8/vendor/guzzlehttp/guzzle/src/Cookie/FileCookieJar.php#L45",
+      "https://plugins.trac.wordpress.org/changeset/3797458/elex-helpdesk-customer-support-ticket-system/trunk/includes/class-crm-public-functions.php"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-119618": {
     "cvss": null,
     "epss": null,
@@ -414,6 +444,52 @@
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-120779",
       "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-120779"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-120868": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:L/SI:L/SA:L/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "source-reported",
+    "firstSeen": "2026-11-13",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-13",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-120868",
+      "https://support.citrix.com/support-home/kbsearch/article?articleNumber=CTX697305"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-123039": {
+    "cvss": {
+      "score": 7.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "source-reported",
+    "firstSeen": "2026-11-13",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-13",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123039",
+      "https://support.checkpoint.com/results/sk/sk1000362"
     ],
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
@@ -628,6 +704,34 @@
     "status": "Analyzed",
     "verification": "nvd+kev"
   },
+  "CVE-2026-125055": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-13",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-13",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-125055",
+      "https://plugins.trac.wordpress.org/browser/chatterbug-forms/tags/1.0.2/chatterbug-forms.php#L308",
+      "https://plugins.trac.wordpress.org/browser/chatterbug-forms/tags/1.0.2/chatterbug-forms.php#L331",
+      "https://plugins.trac.wordpress.org/browser/chatterbug-forms/tags/1.0.2/chatterbug-forms.php#L422",
+      "https://plugins.trac.wordpress.org/browser/chatterbug-forms/tags/1.0.2/chatterbug-forms.php#L510",
+      "https://plugins.trac.wordpress.org/changeset/3794492/chatterbug-forms/trunk/chatterbug-forms.php",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/7819c1fa-884b-4f1d-ba63-84057bf6da84?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-125350": {
     "cvss": {
       "score": 8.8,
@@ -674,6 +778,30 @@
       "https://www.ptc.com/en/support/article/CS483249"
     ],
     "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-126378": {
+    "cvss": {
+      "score": 9.4,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-13",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-13",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-126378",
+      "https://github.com/givanz/Vvveb/security/advisories/GHSA-xpgr-r6c8-3hpq",
+      "https://www.vulncheck.com/advisories/vvveb-through-1.0.8.6-webshell-upload-via-theme-installer-validfile-bypass"
+    ],
+    "status": "Deferred",
     "verification": "nvd+kev"
   },
   "CVE-2026-15266": {
