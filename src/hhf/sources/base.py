@@ -17,6 +17,8 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from ..credentials import redact, require_https, same_origin
+
 log = logging.getLogger("hhf.sources")
 
 USER_AGENT = "hhf-blog-automation/0.1 (+https://github.com/hhftechnology/hhf-blog-automation)"
@@ -48,7 +50,7 @@ class Fetcher:
         self.ttl = ttl
         self.timeout = timeout
         self.client = client or httpx.Client(
-            timeout=timeout, headers={"User-Agent": USER_AGENT}, follow_redirects=True
+            timeout=timeout, headers={"User-Agent": USER_AGENT}, follow_redirects=True, trust_env=False
         )
         self.min_interval = min_interval or {}
         self._last: dict[str, float] = {}
@@ -97,6 +99,10 @@ class Fetcher:
         ttl: float | None = None,
         cache: bool = True,
     ) -> bytes:
+        auth_headers = [v.removeprefix("Bearer ") for k, v in (headers or {}).items()
+                        if k.lower() in ("authorization", "apikey", "auth-key", "api-key", "x-otx-api-key")]
+        if auth_headers:
+            require_https(httpx.URL(url))
         ttl = self.ttl if ttl is None else ttl
         key = self._key(method, url, params, json_body if json_body is not None else data)
         if cache:
@@ -112,10 +118,19 @@ class Fetcher:
             self._last[host] = time.monotonic()
             self.calls += 1
             try:
-                r = self.client.request(
-                    method, url, params=params, headers=headers, json=json_body, data=data,
-                    timeout=self.timeout,
-                )
+                r = self.client.request(method, url, params=params, headers=headers, json=json_body, data=data,
+                                        timeout=self.timeout, follow_redirects=not auth_headers and
+                                        self.client.follow_redirects)
+                if auth_headers:
+                    for _ in range(5):
+                        if not (method == "GET" and r.has_redirect_location):
+                            break
+                        target = r.url.join(r.headers["Location"])
+                        if not same_origin(httpx.URL(url), target):
+                            break
+                        r = self.client.get(target, headers=headers, timeout=self.timeout, follow_redirects=False)
+                    if r.is_redirect:
+                        raise SourceError(f"Unexpected redirect from {safe_url(url)}")
             except httpx.HTTPError as exc:
                 last_err = type(exc).__name__
                 log.warning("network error %s on %s", last_err, safe_url(url))
@@ -135,6 +150,10 @@ class Fetcher:
                 raise SourceError(f"HTTP {r.status_code} from {safe_url(url)}")
             if len(r.content) > self.max_bytes:
                 raise SourceError(f"response too large from {safe_url(url)}")
+            if auth_headers:
+                body = r.content.decode("utf-8", errors="replace")
+                if redact(body, *auth_headers) != body:
+                    raise SourceError("Authenticated source returned a credential")
             if "github" in host:
                 self.rate_remaining = r.headers.get("x-ratelimit-remaining")
             if cache:

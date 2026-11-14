@@ -122,6 +122,25 @@ def test_fetcher_retries_429_with_retry_after(tmp_path):
     assert fx.get_json("https://x.test/a") == {"ok": True} and 3.0 in slept
 
 
+def test_authenticated_source_redirect_and_credential_echo_are_blocked(tmp_path):
+    secret = "fake-source-credential"
+    seen = []
+
+    def handler(req):
+        seen.append(req.url)
+        if req.url.path == "/redirect":
+            return httpx.Response(302, headers={"Location": "https://other.test/receive"})
+        return httpx.Response(200, text=secret)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=True)
+    fx = Fetcher(cache_dir=tmp_path, client=client)
+    with pytest.raises(SourceError, match="Unexpected redirect"):
+        fx.get_text("https://source.test/redirect", headers={"apiKey": secret})
+    with pytest.raises(SourceError, match="returned a credential") as err:
+        fx.get_text("https://source.test/echo", headers={"apiKey": secret})
+    assert len(seen) == 2 and not list(tmp_path.iterdir()) and secret not in str(err.value)
+
+
 def test_nvd_404_with_key_retries_without_key(monkeypatch, tmp_path, caplog):
     monkeypatch.setenv("NVD_API_KEY", "sekret-key-123")
     monkeypatch.setattr(nvd, "_key_rejected", False)
