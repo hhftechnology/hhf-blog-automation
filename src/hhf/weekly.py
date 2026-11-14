@@ -14,7 +14,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import date, datetime, time as dtime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 import yaml
 
@@ -584,7 +584,13 @@ def remediation_steps(g: Group) -> list[str]:
         steps.append(f"Until you can upgrade, limit network access to {g.display} to trusted hosts (VPN or allow-list).")
     if g.is_kev:
         steps.append("This is exploited in the wild: patch today and check for signs of compromise.")
-    return steps[:3]
+    steps.append("Review recent logs of the affected service for unusual requests before and after patching.")
+    if g.ubuntu:
+        steps.append("Verify: after the restart, confirm the installed package matches the fixed version for your Ubuntu release and the service passes its health check.")
+    elif a.fixed_version and not a.unpatched:
+        version = "the fixed release for your branch or later" if "," in a.fixed else f"{a.fixed_version} or later"
+        steps.append(f"Verify: after the restart, confirm the running version is {version} and the service passes its health check.")
+    return steps
 
 
 def severity_line(a: Advisory, kev: bool | None = None) -> str:
@@ -603,7 +609,7 @@ def id_line(g: Group) -> str:
     if g.others:
         more = f" (and {len(g.others)} more, incl. " + ", ".join(adv_id(o) for o in g.others[:3]) + ")"
     if a.cves:
-        return f"**{a.cves[0]}**{more}"
+        return (f"**{a.ghsa}** / " if a.ghsa else "") + f"**{a.cves[0]}**{more}"
     return f"**{a.ghsa or a.key}** (no CVE yet){more}"
 
 
@@ -820,74 +826,29 @@ def build_intro(n_items: int, m_items: int, missed_labels: list[str], edge_claus
     return f"{lead}{edge}{fast}"
 
 
-_ADMIN_RE = re.compile(r"\b(admin\w*|management|api|console|dashboard|web (?:ui|interface|gui)|control plane|listener)\b", re.I)
-_RESTRICT_RE = re.compile(r"read-only|restricted|non-admin|low[- ]privilege\w*|unprivileged|limited (?:user|role)", re.I)
-
-
-def _names_of(groups: list[Group]) -> str:
-    return join_names([g.label for g in groups])
-
-
-def takeaways(main: list[Group], left: list[Group], missed: list[Group]) -> list[str]:
-    shown = main + missed
-    bullets: list[str] = []
-    kev_adv = [(g, a) for g in shown for a in g.advs if a.is_kev]
-    if kev_adv:
-        parts = [f"{g.label} {', '.join(c for c in a.cves if c in a.kev)}" for g, a in kev_adv[:4]]
-        one = len(parts) == 1
-        bullets.append(f"**Exploited first**: {join_names(parts)} {'is' if one else 'are'} on CISA’s KEV list, so attackers "
-                       f"are already using {'it' if one else 'them'}. Patch {'it' if one else 'these'} today.")
-    mgmt = [g for g in main if g.primary.category in ("platform", "data", "edge", "identity")
-            and _ADMIN_RE.search(g.primary.title + " " + g.primary.description[:600])]
-    if len(mgmt) >= 2:
-        bullets.append(f"**Your management plane is the target**: {_names_of(mgmt[:5])} all had bugs reachable through an admin, API or "
-                       "web UI port. None of these belong on the internet. Put them behind a VPN or allow-list.")
-    restricted = [g for g in shown if _RESTRICT_RE.search(g.primary.title + " " + g.primary.description[:800])]
-    if restricted:
-        bullets.append(f"**“Read-only” and “restricted” users aren’t**: {_names_of(restricted[:4])} "
-                       f"{'has' if len(restricted) == 1 else 'have'} flaws where a limited or low-privilege account can do more than intended. "
-                       "Audit who has accounts and tokens.")
-    usns = sorted({u for g in shown for a in g.advs for u, _ in a.usn})
-    if usns:
-        bullets.append(f"**Patch the OS too**: Ubuntu published {join_names(usns[:4])} for CVEs in this list. Run "
-                       "`sudo apt update && sudo apt upgrade`, and reboot after kernel updates.")
-    unpatched = [g for g in main if g.primary.unpatched]
-    if unpatched:
-        bullets.append(f"**No fix yet**: {_names_of(unpatched[:4])} {'has' if len(unpatched) == 1 else 'have'}, per the advisory, no fix yet. "
-                       "Limit exposure until one ships.")
-    edge = [g for g in main if g.primary.category == "edge"]
-    if edge:
-        bullets.append(f"**Your edge comes first**: {_names_of(edge[:5])} {'sits' if len(edge) == 1 else 'sit'} in front of everything else. "
-                       "Update the edge before the apps behind it.")
-    also = ""
-    if left:
-        parts = []
-        for g in left[:10]:
-            a = g.primary
-            cv = f"CVSS {a.cvss:.1f}" if a.cvss is not None else (a.severity or "unrated")
-            fx = (f", fixed {', '.join(a.fixed.split(', ')[:2])}" if a.fixed_version else
-                  f", fixed upstream in commit {a.fix_commit}" if a.fix_commit else
-                  ", no fix yet" if a.unpatched else ", fixed version not listed")
-            parts.append(f"{g.label} {adv_id(a)} ({cv}{fx})")
-        extra = f" Plus {len(left) - 10} more projects." if len(left) > 10 else ""
-        also = f"**Also this week**: {'. '.join(parts)}.{extra}"
-    fillers = [
-        "**Patch order**: exploited bugs first, then anything rated CVSS 9 or higher, then your edge, then the rest.",
-        "**Know what you run**: check the version you actually have deployed against the affected ranges above before assuming you are safe.",
-        "**Stay current**: most of these are fixed in the newest release, so a routine update closes them.",
-    ]
-    limit = 7 - (1 if also else 0)
-    bullets = bullets[:limit]
-    for f in fillers:
-        if len(bullets) + (1 if also else 0) >= 4:
-            break
-        bullets.append(f)
-    if also:
-        bullets.append(also)
-    return bullets
-
-
 # ---- views ------------------------------------------------------------------------------------
+def link_url(url: str | None) -> str:
+    if not url or re.search(r'[\s<>\[\]"\\]', url):
+        return ""
+    try:
+        u = urlsplit(url)
+        if u.scheme in ("http", "https") and u.hostname and not u.username and not u.password:
+            return url.replace("(", "%28").replace(")", "%29")
+    except ValueError:
+        pass
+    return ""
+
+
+def advisory_links(a: Advisory) -> list[tuple[str, str]]:
+    links = list(a.references)
+    if a.ghsa:
+        base = f"{a.repo}/security/advisories" if a.repo else "advisories"
+        links.insert(0, (a.ghsa, f"https://github.com/{base}/{a.ghsa}"))
+    links.extend((f"NVD {c}", f"https://nvd.nist.gov/vuln/detail/{c}") for c in a.cves)
+    links.extend((usn, f"https://ubuntu.com/security/notices/{usn}") for usn, _ in a.usn)
+    return [(label, url) for label, raw in links if (url := link_url(raw))]
+
+
 def reference_links(g: Group) -> tuple[list[tuple[str, str]], bool]:
     """Up to 3 links; True when more existed (then an 'All <Project> advisories' link is added)."""
     p = g.primary
@@ -896,10 +857,10 @@ def reference_links(g: Group) -> tuple[list[tuple[str, str]], bool]:
         lab = ref[0]
         if lab.startswith("NVD "):
             return 1
-        return 0 if lab.startswith("GHSA") else 4 if lab.startswith("CISA") else 3 if not lab.startswith("USN") else 2
+        return 0 if lab.startswith(("GHSA", "USN")) else 4 if lab.startswith("CISA") else 3
 
-    prim = sorted(p.references, key=rank) if p.ghsa else sorted(p.references, key=lambda r: (0 if r[0].startswith("NVD ") else rank(r)))
-    cands = prim[:2] + [o.references[0] for o in g.others if o.references] + prim[2:]
+    prim = sorted(advisory_links(p), key=rank)
+    cands = prim[:2] + [links[0] for o in g.others if (links := advisory_links(o))] + prim[2:]
     seen, out = set(), []
     for lab, url in cands:
         if url and url not in seen:
@@ -911,14 +872,19 @@ def reference_links(g: Group) -> tuple[list[tuple[str, str]], bool]:
 def reference_line(g: Group) -> str:
     links, more = reference_links(g)
     parts = [f"[{lab}]({url})" for lab, url in links]
-    p = g.primary
     if more:
         seen = set()
         for a in g.advs:  # one "All ..." link per merged project (Incus & LXD)
             if a.repo and a.project not in seen and len(seen) < 2:
                 seen.add(a.project)
                 parts.append(f"[All {a.project} advisories](https://github.com/{a.repo}/security/advisories)")
-    return " / ".join(parts) if parts else adv_id(p)
+    return " / ".join(parts)
+
+
+def overflow_items(groups: list[Group]) -> list[dict]:
+    return [{"title": f"{g.label}: {g.primary.title}", "id": g.primary.ghsa or adv_id(g.primary),
+             "severity": severity_line(g.primary), "url": next((url for _, url in advisory_links(g.primary)), "")}
+            for g in groups[:10]]
 
 
 def table_rows(g: Group, cap: int = 4) -> list[dict]:
@@ -978,7 +944,8 @@ def view(g: Group, prose: str, short: str | None = None, missed: bool = False) -
     steps = remediation_steps(g)
     other = others_sentence(g)
     full_prose = " ".join(x for x in (prose.strip(), other) if x)
-    head = f"{id_line(g)} | Disclosed: {disclosed_text(g, missed)}  \n**Project** : {md_text(g.display)}"
+    head = f"{id_line(g)} | Disclosed: {disclosed_text(g, missed)}\n\n**Project** : {md_text(g.display)}"
+    refs, _ = reference_links(g)
     return {
         "title": title, "head": head, "prose": full_prose,
         "severity_line": severity_line(a, kev=g.is_kev),
@@ -987,13 +954,44 @@ def view(g: Group, prose: str, short: str | None = None, missed: bool = False) -
                  or ("No fixed release yet, per the advisory." if a.unpatched else "No fixed version listed in the sources. Check the vendor release notes."),
         "workaround": a.workaround or "None published. Upgrade.",
         "rows": table_rows(g),
-        "steps_line": " ".join(f"{i}. {s}" for i, s in enumerate(steps, 1)),
+        "steps": steps,
+        "references": [("Vendor advisory" if a.repo and label == a.ghsa else label, url) for label, url in refs],
         "reference_line": reference_line(g),
     }
 
 
-DATA_LINE = (f"*Data: GitHub Advisory Database (CC BY 4.0), NVD, FIRST EPSS, CISA KEV, Ubuntu Security Notices. "
-             f"{nvd.ATTRIBUTION}*")
+DATA_LINE = f"""## Sources
+
+- GitHub Advisory Database (GHSA), CC-BY-4.0: https://github.com/advisories
+- NVD CVE API 2.0. {nvd.ATTRIBUTION}
+- OSV.dev: https://osv.dev (per-record licences apply)
+- FIRST EPSS: https://www.first.org/epss
+- CISA Known Exploited Vulnerabilities Catalog: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+- Ubuntu Security Notices: https://ubuntu.com/security/notices
+- GitHub Releases of watchlist projects: https://docs.github.com/en/rest/releases
+
+*Facts come from the sources above. Prose may be AI-assisted and fact-checked automatically. Always check the official advisory before acting.*"""
+
+
+def security_releases(projects: list[dict], since: date, until: date, fx: Fetcher) -> list[dict]:
+    start = datetime.combine(since, dtime.min, timezone.utc)
+    rows = []
+    seen = set()
+    for project in projects:
+        repo = project.get("repo")
+        if not repo or repo in seen:
+            continue
+        if _low_rate(fx):
+            log.warning("GitHub rate limit nearly exhausted; skipping remaining releases")
+            break
+        seen.add(repo)
+        for release in sorted(releases.since(releases.latest(repo, fx, per_page=30), start),
+                              key=lambda r: r["published"], reverse=True):
+            day = _dt(release["published"]).date()
+            if day <= until and release["security"] and not release["prerelease"] and release["tag"]:
+                if url := link_url(release["url"]):
+                    rows.append({"project": project["name"], "version": release["tag"], "url": url, "day": day})
+    return rows
 
 
 # ---- AI helpers (all output passes the fact guard; deterministic fallbacks otherwise) ---------------------
@@ -1065,12 +1063,12 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
     stats["usn_matches"] = attach_usn([a for g in shown + missed for a in g.advs], fx)
     for g in shown + missed:
         g.ubuntu = ubuntu_info(g)
+    release_rows = security_releases(projects, since, until, fx)
     stats["main"], stats["missed"] = len(shown), len(missed)
 
     prose = {g.label: det_prose(g.primary) for g in shown + missed}
     shorts = {g.label: short_title(g.primary.title, g.names()) for g in shown + missed + left + left_missed}
     clauses: dict[str, str] = {}
-    bullet_ai: dict[int, str] = {}
 
     def render_all() -> str:
         edge_g, fast_g = intro_groups(shown)
@@ -1078,14 +1076,12 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
             len(shown), len(missed), [g.label for g in missed],
             [clauses.get(g.label) or clause_for(g, shorts[g.label]) for g in edge_g],
             [clauses.get(g.label) or clause_for(g, shorts[g.label]) for g in fast_g])
-        bullets = takeaways(shown, left + left_missed, missed)
-        bullets = [bullet_ai.get(i, b) if not b.startswith("**Also this week**") else b for i, b in enumerate(bullets)]
         meta["intro"] = intro
         ctx = {
             "intro": intro,
             "items": [view(g, prose[g.label], shorts[g.label]) for g in shown],
             "missed": [view(g, prose[g.label], shorts[g.label], missed=True) for g in missed],
-            "takeaways": bullets, "data_line": DATA_LINE,
+            "overflow": overflow_items(left + left_missed), "releases": release_rows, "data_line": DATA_LINE,
         }
         return scrub_pseudo(render_weekly(ctx))
 
@@ -1122,15 +1118,6 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
         edge_g, fast_g = intro_groups(shown)
         clauses.update(ai_clauses(writer, edge_g + [g for g in fast_g if g not in edge_g], shorts, dates))
         sleep(4)
-        for i, b in enumerate(takeaways(shown, left + left_missed, missed)):
-            if b.startswith("**Also this week**") or ": " not in b:
-                continue
-            lead, body = b.split(": ", 1)
-            t = writer.prose("Rewrite this note in one or two plain sentences without changing any fact.", {"note": body},
-                             max_chars=len(body) + 120, allow={"dates": dates})
-            sleep(4)
-            if t:
-                bullet_ai[i] = f"{lead}: {t}"
         raw = fit()
     stats["main"], stats["missed"] = len(shown), len(missed)
     title = f"🚨 Weekly Self-Hosted Security Summary ({fmt_range(since, until)})"

@@ -33,8 +33,8 @@ def test_weekly_end_to_end(mock_fx):
     # reference layout
     assert "### **1. " in raw and "**Technical Details** :" in raw and "* **Severity** : " in raw
     assert "| CVE | CVSS | Exploitation | EPSS | Action |" in raw
-    assert "**Remediation Steps** : 1. " in raw and "**Reference** : [" in raw and "**Official References**" not in raw
-    assert "## **Missed Earlier**" in raw and "## Sources" not in raw and "## **Key Takeaways This Week**" in raw
+    assert "**Remediation Steps**\n\n1. " in raw and "**Reference** : [" in raw and "**Official References**" in raw
+    assert "## Missed Earlier" in raw and "## Sources" in raw and "Key Takeaways" not in raw
     # KEV item first, with CVE row + action
     assert "### **1. Keycloak" in raw and "### **2. Traefik" in raw
     assert "| CVE-2026-1111 | 9.8 | Known exploited (CISA KEV) | 64.0% (99th percentile) | Patch now |" in raw
@@ -48,8 +48,8 @@ def test_weekly_end_to_end(mock_fx):
     assert "| CVE-2026-4444 | 8.8 | Public PoC | 12.0% (91st percentile) | Patch within 72h |" in raw
     assert "CVE-2026-5555" not in raw  # no watchlist match
     # missed earlier: Grafana from Oct 20 (8-30 days old)
-    assert raw.index("## **Missed Earlier**") < raw.index("Grafana: Older Issue")
-    assert "Security-related releases" not in raw
+    assert raw.index("## Missed Earlier") < raw.index("Grafana: Older Issue")
+    assert "Security-related releases" in raw
     assert "SECRET" not in raw
 
 

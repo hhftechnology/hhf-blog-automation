@@ -15,7 +15,17 @@
 | {{ r.cve }} | {{ r.cvss }} | {{ r.exploitation }} | {{ r.epss }} | {{ r.action }} |
 {% endfor %}
 
-**Remediation Steps** : {{ it.steps_line | md }}
+**Remediation Steps**
+
+{% for step in it.steps %}
+{{ loop.index }}. {{ step | md }}
+{% endfor %}
+
+**Official References**
+
+{% for label, url in it.references %}
+- {{ label | md }}: {{ url }}
+{% endfor %}
 
 **Reference** : {{ it.reference_line }}
 

@@ -1,6 +1,7 @@
-"""Layout tests for the weekly advisory (reference: forum topic 4696, tests/fixtures/format/reference_4696.md)."""
+"""Layout tests for the weekly advisory (reference: forum topic 4790, tests/fixtures/format/reference_4790.md)."""
 import json
 import re
+from pathlib import Path
 from datetime import date, datetime, timezone
 
 import httpx
@@ -118,7 +119,7 @@ def test_golden_structure(golden_fx):
     # Traefik item: GHSA only, two Go modules, exact bullets
     t = raw[raw.index("### **", raw.index("Traefik: ") - 10):]
     t = t.split("\n---\n")[0]
-    assert "**GHSA-xv5x-242w-7hf7** (no CVE yet) | Disclosed: November 2, 2026  \n**Project** : Traefik\n" in t  # hard break
+    assert "**GHSA-xv5x-242w-7hf7** (no CVE yet) | Disclosed: November 2, 2026\n\n**Project** : Traefik\n" in t
     assert "\n\n**Technical Details** : " in t
     for label in ("Severity", "Affected", "Fixed", "Workaround"):
         assert f"\n* **{label}** : " in t
@@ -126,16 +127,23 @@ def test_golden_structure(golden_fx):
     assert "* **Affected** : v2.11.58 – v2.11.60, v3.7.14 – v3.7.16" in t
     assert "* **Fixed** : v2.11.61, v3.7.17" in t
     assert "| CVE | CVSS | Exploitation | EPSS | Action |\n|---|---|---|---|---|\n| GHSA-xv5x-242w-7hf7 | 7.5 | None known | N/A | Patch this week |" in t
-    steps = [ln for ln in t.split("\n") if ln.startswith("**Remediation Steps**")]
-    assert len(steps) == 1 and re.fullmatch(r"\*\*Remediation Steps\*\* : 1\. .+ 2\. .+", steps[0])
-    assert "review" not in steps[0].lower() and "verify" not in steps[0].lower()
+    assert "**Remediation Steps**\n\n1. " in t
+    assert "\n3. Review recent logs" in t and "\n4. Verify:" in t
+    assert "**Official References**\n\n- Vendor advisory: https://" in t
     assert "\n**Reference** : [GHSA-xv5x-242w-7hf7](https://github.com/traefik/traefik/security/advisories/GHSA-xv5x-242w-7hf7)\n" in t
-    assert "Official References" not in raw
+
+    reference = (Path(__file__).parent / "fixtures/format/reference_4790.md").read_text(encoding="utf-8")
+    block_pattern = r"(?m)^### \*\*\d+\. .*?(?=^---$)"
+    layout = r"(?m)^(\*\*(?:Project|Technical Details|Remediation Steps|Official References|Reference)\*\*|\* \*\*(?:Severity|Affected|Fixed|Workaround)\*\*|\| CVE \|)"
+    fixture, rendered = (re.findall(block_pattern, doc, re.S) for doc in (reference, raw))
+    assert len(fixture) == 13 and len(rendered) == 4
+    assert all(re.findall(layout, block) == re.findall(layout, fixture[0]) for block in rendered)
+    assert all("https://" in block and re.search(r"(?m)^\*\*Reference\*\* : \[.+\]\(https://", block) for block in rendered)
 
     # BIND item: three CVEs folded into one, USN link, "and N more"
     b = raw[raw.index("**CVE-2026-94300**"):].split("\n---\n")[0]
     assert b.startswith("**CVE-2026-94300** (and 2 more, incl. CVE-2026-19630, CVE-2026-96888) | Disclosed: November 3, 2026 "
-                        "(USN-8969-1)  \n**Project** : Ubuntu (`bind9`)")
+                        "(USN-8969-1)\n\n**Project** : Ubuntu (`bind9`)")
     assert "* **Fixed** : 22.04: `1:9.18.39-0ubuntu0.22.04.8`. 24.04: `1:9.18.39-0ubuntu0.24.04.9`. Run `sudo apt update && sudo apt upgrade` and restart `named`." in b
     assert "* **Affected** : `bind9` on Ubuntu 22.04 LTS, 24.04 LTS" in b
     assert "1. Update the package with `sudo apt update && sudo apt upgrade`, then restart the service (`sudo systemctl restart named`)." in b
@@ -154,19 +162,12 @@ def test_golden_structure(golden_fx):
     assert re.search(r"^### \*\*\d\. Caddy: .*, 2 More\*\*$", raw, re.M)
 
     # footer order
-    order = ["## **Key Takeaways This Week**", "**Recommendation** : Review your self-hosted stack this weekend and prioritize "
-             "upgrades for any of the above projects you’re running.", "Stay secure!",
-             "*Questions or need config help? Post in [Help](https://forum.hhf.technology/c/help/85).*", "## **Missed Earlier**",
-             "These came out before this week and weren’t in an earlier summary. They only reached the GitHub global advisory "
-             "database this week.", "### **4. Keycloak: ", "*Data: GitHub Advisory Database (CC BY 4.0), NVD, FIRST EPSS, CISA KEV, Ubuntu Security Notices. This product uses data from the NVD API"]
+    order = ["## Missed Earlier", "### **4. Keycloak: ", "## Security-related releases", "## Sources"]
     pos = [raw.index(x) for x in order]
     assert pos == sorted(pos)
-    bullets = [ln for ln in raw[pos[0]:pos[1]].split("\n") if ln.startswith("* ")]
-    assert 4 <= len(bullets) <= 7 and all(re.match(r"^\* \*\*[^*]+\*\*", b) for b in bullets)
-    assert "---\n\n## **Missed Earlier**" in raw
+    assert "- **Traefik** [v3.6.2](https://github.com/traefik/traefik/releases/tag/v3.6.2) (2026-11-03)" in raw
     assert "(added to GitHub Advisory Database October 30)" in raw
-    for gone in ("Also disclosed this week", "Security-related releases", "## Sources", "&lt;", "&gt;"):
-        assert gone not in raw
+    assert "Key Takeaways" not in raw and "Also disclosed this week" not in raw
     assert len(raw) < 30000
 
 
@@ -255,7 +256,7 @@ def test_grouping_merges_incus_and_lxd_and_orders_by_severity():
     assert [g.label for g in groups] == ["Incus & LXD", "Gitea"]
     assert groups[0].primary.project == "LXD" and len(groups[0].others) == 1
     assert groups[1].primary.ghsa == "GHSA-4444-4444-4444"
-    assert weekly.id_line(groups[0]) == "**CVE-2026-1** (and 1 more, incl. GHSA-1111-1111-1111)"
+    assert weekly.id_line(groups[0]) == "**GHSA-2222-2222-2222** / **CVE-2026-1** (and 1 more, incl. GHSA-1111-1111-1111)"
     v = weekly.view(groups[1], "p")
     assert v["title"].endswith(", 1 More") and "**Project** : Gitea" in v["head"]
     wl = {p["name"]: p.get("group") for p in WL}
@@ -268,11 +269,10 @@ def test_group_caps_and_leftovers(golden_fx):
                       severity="high", cvss=8.0 - i / 100, fixed="1.0", fixed_version="1.0",
                       published=datetime(2026, 11, 1, tzinfo=timezone.utc)) for i in range(14)]
     groups = weekly.group_advisories(items)
-    bullets = weekly.takeaways(groups[:weekly.MAX_MAIN], groups[weekly.MAX_MAIN:], [])
     assert weekly.MAX_MAIN == 11 and weekly.MAX_MISSED == 3
-    also = [b for b in bullets if b.startswith("**Also this week**")]
-    assert len(also) == 1 and "Proj11 CVE-2026-11 (CVSS 7.9, fixed 1.0)" in also[0] and "Proj13" in also[0]
-    assert 4 <= len(bullets) <= 7
+    overflow = weekly.overflow_items(groups[weekly.MAX_MAIN:])
+    assert [row["id"] for row in overflow] == ["CVE-2026-11", "CVE-2026-12", "CVE-2026-13"]
+    assert all(row["url"] for row in overflow)
 
 
 def test_title_cleanup():
@@ -340,7 +340,7 @@ def test_ghsa_only_reviewed_this_week_is_missed_with_added_date(tmp_path):
     h = make_router({"api.github.com/advisories": gh})
     fx = Fetcher(cache_dir=tmp_path, client=httpx.Client(transport=httpx.MockTransport(h)), sleep=lambda s: None, max_retries=0)
     r = build(fx)
-    assert "## **Missed Earlier**" in r["raw"]
+    assert "## Missed Earlier" in r["raw"]
     assert "Disclosed: July 1, 2026 (added to GitHub Advisory Database November 2)" in r["raw"]
 
 
@@ -511,9 +511,7 @@ def test_brotli_kev_record_is_never_attributed_to_clickhouse():
     a = Advisory(key="CVE-2026-111497", title="t", project="ClickHouse", cves=["CVE-2026-111497"], kev_aliases=p["kev"], severity="critical")
     weekly.finalize(a, {}, None, {"CVE-2026-111497": BROTLI_KEV}, {}, {})
     assert a.kev == {} and not a.is_kev
-    # ... and no ClickHouse KEV bullet is produced
-    g = weekly.Group("ClickHouse", [a])
-    assert not [b for b in weekly.takeaways([g], [], []) if "Exploited first" in b or "KEV" in b]
+    assert "CISA KEV" not in weekly.severity_line(a)
 
 
 def test_nvd_matching_uses_only_vulnerable_cpes_of_the_project():
@@ -568,7 +566,6 @@ def test_kev_entry_in_window_becomes_the_first_item(tmp_path):
     assert "* **Fixed** : 7.1.4, 7.0.8, 6.9.11, 6.8.12 (and backports)" in raw
     assert "No fix yet" not in raw and "no tagged" not in raw.lower()
     assert "| CVE-2026-119977 | 8.1 | Known exploited (CISA KEV) | N/A | Patch now |" in raw
-    assert "**Exploited first**: WordPress CVE-2026-119977 is on CISA’s KEV list" in raw
     assert "ClickHouse" not in raw and "CVE-2026-111497" not in raw  # the Brotli entry belongs to nobody on the watchlist
 
 
@@ -583,7 +580,7 @@ def test_posted_ids_are_excluded_everywhere(golden_fx):
     r = weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, writer=ai.AIWriter(enabled=False), projects=WL,
                      posted=posted, sleep=lambda s: None)
     raw = r["raw"]
-    assert "Traefik" not in raw and "GHSA-xv5x-242w-7hf7" not in raw and "Keycloak" not in raw and "## **Missed Earlier**" not in raw
+    assert "GHSA-xv5x-242w-7hf7" not in raw and "Keycloak" not in raw and "## Missed Earlier" not in raw
     assert "**CVE-2026-19630**" in raw  # the other BIND CVEs were not posted, so they still appear
     assert raw.count("\n### **") == 2 and raw.startswith("Here’s a roundup of **2 critical/high security issues**")
 
@@ -717,7 +714,7 @@ def test_no_fix_claims_need_explicit_evidence():
     weekly.resolve_fixed(a, None)
     assert a.unpatched is True
     g = weekly.Group("P", [a])
-    assert any(b.startswith("**No fix yet**") for b in weekly.takeaways([g], [], []))
+    assert "No fixed release yet" in weekly.view(g, "p")["fixed"]
     # OSV unknown, or a fix commit found: never "no fix"
     b = Advisory(key="CVE-2", title="t", project="P", group="P", cves=["CVE-2"], severity="high",
                  description="There is no fix available.", osv_checked=False)
@@ -726,13 +723,11 @@ def test_no_fix_claims_need_explicit_evidence():
     c = Advisory(key="CVE-3", title="t", project="P", group="P", cves=["CVE-3"], severity="high", fix_commit="abc1234",
                  fixed="Fixed upstream in commit abc1234. Check the latest release.", description="no fix available", osv_checked=True)
     weekly.resolve_fixed(c, None)
-    gs = [weekly.Group("P", [b]), weekly.Group("Q", [c])]
-    assert not [x for x in weekly.takeaways(gs, [], []) if x.startswith("**No fix yet**")]
     v = weekly.view(weekly.Group("P", [c]), "p")
     assert "* **Fixed**" not in v["fixed"] and v["fixed"] == "Fixed upstream in commit abc1234. Check the latest release."
-    assert "1. Upgrade to the latest release (the fix is in commit abc1234)." in v["steps_line"]
+    assert "Upgrade to the latest release (the fix is in commit abc1234)." in v["steps"]
     vb = weekly.view(weekly.Group("P", [b]), "p")
-    assert "no fix yet" not in (vb["fixed"] + vb["steps_line"]).lower() and "ships" not in vb["steps_line"]
+    assert "no fix yet" not in (vb["fixed"] + " ".join(vb["steps"])).lower() and all("ships" not in step for step in vb["steps"])
 
 
 def test_kev_boilerplate_is_never_a_workaround():
