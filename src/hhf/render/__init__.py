@@ -6,6 +6,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 from ..facts import defang, md_cell, md_text
+from ..daily_content import linked_text, plain_md
 
 TEMPLATES = Path(__file__).parent / "templates"
 
@@ -20,6 +21,8 @@ _env = Environment(
 _env.filters["md"] = md_text
 _env.filters["cell"] = md_cell
 _env.filters["defang"] = defang
+_env.filters["linked"] = linked_text
+_env.filters["plain"] = plain_md
 
 
 def render(template: str, **ctx) -> str:

@@ -14,7 +14,7 @@ score_date: str | None = None
 
 
 def lookup(cves: list[str], fx: Fetcher | None = None, chunk: int = 50,
-           *, as_of: date | None = None) -> dict[str, tuple[float, float]]:
+           *, as_of: date | None = None, raise_on_failure: bool = False) -> dict[str, tuple[float, float]]:
     fx = fx or default_fetcher()
     ids = sorted({c.upper() for c in cves})
     global score_date
@@ -24,6 +24,8 @@ def lookup(cves: list[str], fx: Fetcher | None = None, chunk: int = 50,
         try:
             data = fx.get_json(URL, params={"cve": ",".join(ids[i : i + chunk]), **historical}, ttl=6 * 3600)
         except SourceError:
+            if raise_on_failure:
+                raise
             continue
         for row in data.get("data", []):
             if as_of and (not row.get("date") or row["date"] > historical["date"]):

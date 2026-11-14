@@ -161,8 +161,10 @@ class DiscourseClient:
             if tags is None and category is None:
                 self.request("PUT", f"/t/-/{topic_id}.json", data={"title": title})
             else:
-                self.request("PUT", f"/t/-/{topic_id}.json",
-                             json={"title": title, "category_id": category, "tags": [{"name": tag} for tag in tags or []]})
+                payload: dict[str, Any] = {"title": title, "tags": [{"name": tag} for tag in tags or []]}
+                if category is not None:
+                    payload["category_id"] = category
+                self.request("PUT", f"/t/-/{topic_id}.json", json=payload)
         return result
 
     def change_timestamp(self, topic_id: int, timestamp: int | float) -> dict:

@@ -50,7 +50,8 @@ def test_existing_topic_is_edited_not_recreated():
     assert publish.publish(c, **KW)["topic_id"] == 5
     assert not any(s[0] == "POST" and s[1] == "/posts.json" for s in seen)
     assert any(s[0] == "PUT" and s[1] == "/posts/50.json" for s in seen)
-    assert any(s[0] == "PUT" and s[1] == "/t/-/5.json" for s in seen)
+    update = next(s for s in seen if s[:2] == ("PUT", "/t/-/5.json"))
+    assert json.loads(update[2]) == {"title": "T", "tags": [{"name": "daily-briefing"}]}
     assert seen[-1][1] == "/blog-editor/publications/5/publish"
 
 
