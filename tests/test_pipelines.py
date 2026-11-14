@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
-from hhf import ai, daily, discourse, publish, store, weekly
+from hhf import ai, daily, discourse, preflight, publish, store, weekly
 from hhf.facts import Advisory
 
 WL = weekly.load_watchlist()
@@ -11,7 +11,7 @@ WL = weekly.load_watchlist()
 
 def build_weekly(mock_fx, posted=None, writer=None):
     return weekly.build(date(2026, 11, 1), date(2026, 11, 7), fx=mock_fx, writer=writer or ai.AIWriter(enabled=False),
-                        projects=WL, posted=posted or {}, sleep=lambda s: None)
+                        projects=WL, posted=posted or {})
 
 
 def test_watchlist_covers_required_projects():
@@ -29,27 +29,28 @@ def test_weekly_end_to_end(mock_fx):
     assert r["tags"] == ["security", "cve", "weekly-security", "self-hosted"]
     assert r["external_id"] == "weekly-advisory-2026-11-07"
     assert raw.startswith("Here’s a roundup of **")
-    assert "Start with your edge:" in raw and "(see *Missed Earlier*)" in raw
+    assert "Patch first:" in raw and "Next, check your edge:" in raw and "(see *Missed Earlier*)" in raw
     # reference layout
     assert "### **1. " in raw and "**Technical Details** :" in raw and "* **Severity** : " in raw
     assert "| CVE | CVSS | Exploitation | EPSS | Action |" in raw
-    assert "**Remediation Steps** : 1. " in raw and "**Reference** : [" in raw and "**Official References**" not in raw
-    assert "## **Missed Earlier**" in raw and "## Sources" not in raw and "## **Key Takeaways This Week**" in raw
+    assert "**Remediation Steps**\n\n1. " in raw and "**Reference** : [" in raw and "**Official References**" in raw
+    assert "## Missed Earlier" in raw and "## Sources" in raw and "Key Takeaways" not in raw
     # KEV item first, with CVE row + action
-    assert "### **1. Keycloak" in raw and "### **2. Traefik" in raw
+    assert "### **1. Keycloak" in raw and "### **2. Nextcloud" in raw
     assert "| CVE-2026-1111 | 9.8 | Known exploited (CISA KEV) | 64.0% (99th percentile) | Patch now |" in raw
     # GHSA without CVE
     assert "(no CVE yet)" in raw and "| GHSA-xv5x-242w-7hf7 | 7.5 | None known | N/A | Patch this week |" in raw
     # upgrade command from the watchlist image, workaround, USN, NVD references
     assert "`docker pull traefik:3.6.2`" in raw and "Disable the Negotiate header" in raw
+    assert "update the image tag in your Compose file" in raw and "recreate the container with the fixed image" in raw
     assert "https://ubuntu.com/security/notices/USN-9000-1" in raw and "https://nvd.nist.gov/vuln/detail/CVE-2026-1111" in raw
     # unrelated GHSA excluded, NVD-only Nextcloud included (CVSS 8.8, EPSS 0.12 -> 72h, public PoC)
     assert "left-pad" not in raw and "Unrelated" not in raw
     assert "| CVE-2026-4444 | 8.8 | Public PoC | 12.0% (91st percentile) | Patch within 72h |" in raw
     assert "CVE-2026-5555" not in raw  # no watchlist match
     # missed earlier: Grafana from Oct 20 (8-30 days old)
-    assert raw.index("## **Missed Earlier**") < raw.index("Grafana: Older Issue")
-    assert "Security-related releases" not in raw
+    assert raw.index("## Missed Earlier") < raw.index("Grafana: Older Issue")
+    assert "Security-related releases" in raw
     assert "SECRET" not in raw
 
 
@@ -74,15 +75,27 @@ def test_weekly_cli_dry_run_writes_file_only(mock_fx, monkeypatch, tmp_path):
     assert rc == 0 and (tmp_path / "weekly_advisory-2026-11-07.md").exists() and not state.exists()
 
 
-def test_weekly_cli_delivers_and_records_state(mock_fx, monkeypatch, tmp_path):
+@pytest.mark.parametrize("category", [86, 113])
+def test_weekly_cli_delivers_and_records_state(mock_fx, monkeypatch, tmp_path, category):
+    from types import SimpleNamespace
+
     monkeypatch.setattr(weekly, "default_fetcher", lambda: mock_fx)
     sent = []
-    monkeypatch.setattr(discourse, "DiscourseClient", lambda: object())
+    monkeypatch.setattr(discourse, "DiscourseClient", lambda: SimpleNamespace(close=lambda: None))
     monkeypatch.setattr(publish, "publish", lambda c, **kw: sent.append(kw) or {"topic_id": 1, "public_path": "/blog/w"})
+    monkeypatch.setattr(preflight, "readback", lambda *args: (
+        {"title": sent[0]["title"], "tags": [{"name": tag} for tag in weekly.TAGS], "category_id": category,
+         "created_at": "2026-11-07T14:30:00Z"}, sent[0]["raw"], None))
     state = tmp_path / "posted.json"
-    weekly.main(["--since", "2026-11-01", "--until", "2026-11-07", "--no-ai", "--state", str(state)])
+    args = ["--since", "2026-11-01", "--until", "2026-11-07", "--no-ai", "--state", str(state), "--out-dir", str(tmp_path)]
+    assert weekly.main([*args, "--dry-run", "--save-publication-state"]) == 0
+    monkeypatch.setattr(weekly, "default_fetcher", lambda: pytest.fail("publication must reuse the artifact"))
+    assert weekly.main([*args, "--publish-artifact"]) == (0 if category == 86 else 1)
     assert sent[0]["external_id"] == "weekly-advisory-2026-11-07" and sent[0]["tags"][0] == "security"
-    assert "GHSA-aaaa-bbbb-cccc" in json.loads(state.read_text())["posted"]
+    if category == 86:
+        assert "GHSA-aaaa-bbbb-cccc" in json.loads(state.read_text())["posted"]
+    else:
+        assert not state.exists()
 
 
 def test_weekly_uses_ai_prose_only_when_it_passes_the_guard(mock_fx):

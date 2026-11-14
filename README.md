@@ -8,6 +8,10 @@ Automation behind the HHF blog's threat content:
 
 Both pipelines publish through `src/hhf/publish.py`, which is idempotent on the topic `external_id`: a rerun republishes the same article instead of creating a duplicate.
 
+The weekly issue matches advisories against the watchlist by repository, package, or vendor and product. It covers new High and Critical disclosures, CVSS scores of 7.0 or higher, and matched CISA KEV entries. Known exploitation leads, followed by patch urgency, severity, edge and identity services, and CVSS. The same rules pick each project's lead advisory. Historical runs use EPSS from the reporting date. The job log records each advisory's eligibility, priority and placement, and only displayed IDs count as covered.
+
+Weekly technical details describe the affected component, impact, and documented prerequisites. The remediation steps use source facts and include deployment-specific guidance when available, such as updating the Compose image tag and recreating the affected service.
+
 ## Disclaimer
 
 Articles are AI-assisted, published automatically and **not human-reviewed**. Verify with vendors before acting. Facts come from the sources below; AI text is rejected by a fact-check guard when it adds ids, versions, URLs or numbers that are not in the input, and is then replaced by deterministic text. Without an AI key, the briefing never copies publisher text: it shows the headline and a link to the full report.
@@ -54,10 +58,15 @@ Variables / environment:
 |---|---|---|
 | `BLOG_URL` | `https://forum.hhf.technology/blog` | public blog URL, used for API links |
 | `PAGES_URL` | `https://hhftechnology.github.io/hhf-blog-automation` | GitHub Pages URL, used in the feed and index |
-| `BLOG_DRAFTS_CATEGORY_ID` | `113` | category new articles are created in |
-| `AI_PROVIDERS` | `gemini` | AI provider list |
+| `BLOG_DRAFTS_CATEGORY_ID` | `113` | daily blog drafts category |
+| `WEEKLY_CATEGORY_ID` | `86` | weekly category, validated by pre-flight |
+| `AI_PROVIDERS` | weekly `cloudflare,gemini`, daily `gemini` | editor provider order |
+| `CF_AI_MODEL` | `@cf/openai/gpt-oss-120b` | weekly prose model; short titles use Granite Micro |
+| `CF_AI_NEURON_BUDGET` | `6000` | per-run Cloudflare budget checked before each call |
 
-Workflows: `daily.yml` (05:30 UTC), `weekly.yml` (Wednesdays 06:00 UTC), `pages.yml` (tests, builds and deploys the API). Manual runs default to a dry run that uploads `out/` as an artifact.
+For Workers AI, set `CLOUDFLARE_ACCOUNT_ID` and an account-scoped `CLOUDFLARE_API_TOKEN` with Workers AI Read in GitHub Actions secrets. The editor falls back to Gemini if Cloudflare is unavailable. It falls back to deterministic prose when providers fail or the budget is reached. Successful and deterministic choices are reused from `.cache/ai/` for identical inputs. See the [Workers AI REST API](https://developers.cloudflare.com/api/resources/ai/methods/run/) and [pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/).
+
+Workflows: `daily.yml` (05:30 UTC), `weekly.yml` (Wednesdays 14:30 UTC), `pages.yml` (tests, builds and deploys the API). Manual runs default to a dry run that uploads `out/` as an artifact. Weekly pre-flight runs before any publication and checks Discourse readback before recording posted IDs. Enable deny-list entries in `config/forbidden_sources.yml`.
 
 ## Run locally
 
@@ -67,6 +76,9 @@ pip install -e ".[dev]"
 pytest -q
 python -m hhf.daily --dry-run --no-ai     # writes out/daily_briefing-<date>.md
 python -m hhf.weekly --dry-run --no-ai    # writes out/weekly_advisory-<date>.md
+python -m hhf.preflight --raw out/weekly_advisory-2026-11-07.md \
+  --title '🚨 Weekly Self-Hosted Security Summary (October 31 – November 7, 2026)' \
+  --tags security,cve,weekly-security,self-hosted --since 2026-10-31 --until 2026-11-07
 python -m hhf.api --out _site             # builds the API from data/
 ```
 

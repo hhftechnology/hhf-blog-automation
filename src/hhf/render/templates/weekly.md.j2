@@ -7,29 +7,35 @@
 {% include "_item.md.j2" %}
 {% endwith %}
 {% endfor %}
-## **Key Takeaways This Week**
+{% if overflow | default([]) %}
+### Also disclosed this week
 
-{% for b in takeaways %}
-* {{ b | md }}
+{% for row in overflow %}
+- {{ row.title | md }} ({{ row.id | md }}; {{ row.severity | md }}; {{ row.action }}) {{ row.url }}
 {% endfor %}
-
-**Recommendation** : Review your self-hosted stack this weekend and prioritize upgrades for any of the above projects you’re running.
-
-Stay secure!
-
-*Questions or need config help? Post in [Help](https://forum.hhf.technology/c/help/85).*
 
 ---
 
+{% endif %}
 {% if missed %}
-## **Missed Earlier**
+## Missed Earlier
 
-These came out before this week and weren’t in an earlier summary. They only reached the GitHub global advisory database this week.
+These were disclosed before the reporting window and haven’t been covered in an earlier summary.
 
 {% for it in missed %}
 {% with n = items | length + loop.index %}
 {% include "_item.md.j2" %}
 {% endwith %}
 {% endfor %}
+{% endif %}
+{% if releases | default([]) %}
+## Security-related releases
+
+{% for row in releases %}
+- **{{ row.project | md }}** [{{ row.version | md }}]({{ row.url }}) ({{ row.day }})
+{% endfor %}
+
+---
+
 {% endif %}
 {{ data_line }}

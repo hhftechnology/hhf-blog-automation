@@ -19,6 +19,12 @@ def test_epss_lookup(mock_fx):
     assert m["CVE-2026-1111"] == (0.64, 0.985)
 
 
+def test_epss_historical_date_omits_later_scores(mock_fx):
+    result = epss.lookup(["CVE-2026-1111"], mock_fx, as_of=date(2026, 11, 5))
+    assert result == {}
+    assert mock_fx.handler.calls[-1].url.params["date"] == "2026-11-05"
+
+
 def test_nvd_normalize_and_window(mock_fx):
     recs = nvd.fetch_window(datetime(2026, 11, 1, tzinfo=timezone.utc), datetime(2026, 11, 7, tzinfo=timezone.utc), fx=mock_fx)
     by = {r["id"]: r for r in recs}
@@ -120,6 +126,25 @@ def test_fetcher_retries_429_with_retry_after(tmp_path):
     fx = Fetcher(cache_dir=tmp_path, client=httpx.Client(transport=httpx.MockTransport(lambda r: seq.pop(0))),
                  sleep=slept.append, max_retries=2)
     assert fx.get_json("https://x.test/a") == {"ok": True} and 3.0 in slept
+
+
+def test_authenticated_source_redirect_and_credential_echo_are_blocked(tmp_path):
+    secret = "fake-source-credential"
+    seen = []
+
+    def handler(req):
+        seen.append(req.url)
+        if req.url.path == "/redirect":
+            return httpx.Response(302, headers={"Location": "https://other.test/receive"})
+        return httpx.Response(200, text=secret)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=True)
+    fx = Fetcher(cache_dir=tmp_path, client=client)
+    with pytest.raises(SourceError, match="Unexpected redirect"):
+        fx.get_text("https://source.test/redirect", headers={"apiKey": secret})
+    with pytest.raises(SourceError, match="returned a credential") as err:
+        fx.get_text("https://source.test/echo", headers={"apiKey": secret})
+    assert len(seen) == 2 and not list(tmp_path.iterdir()) and secret not in str(err.value)
 
 
 def test_nvd_404_with_key_retries_without_key(monkeypatch, tmp_path, caplog):

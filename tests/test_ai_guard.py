@@ -1,4 +1,5 @@
 import json
+import ssl
 
 import httpx
 import pytest
@@ -165,3 +166,106 @@ def test_gemini_second_failure_raises_and_no_retry_on_400(monkeypatch):
     with pytest.raises(ai.ProviderError):
         ai.Gemini().complete("s", "u", client)
     assert len(calls) == 1
+
+
+@pytest.fixture
+def cf_credentials(monkeypatch):
+    token = "test-cloudflare-token-sentinel"
+    monkeypatch.setenv("CLOUDFLARE_ACCOUNT_ID", "a" * 32)
+    monkeypatch.setenv("CLOUDFLARE_API_TOKEN", token)
+    monkeypatch.setenv("AI_PROVIDERS", "cloudflare,gemini")
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    return token
+
+
+def test_cloudflare_retry_budget_and_cache(cf_credentials, monkeypatch, tmp_path):
+    monkeypatch.setenv("CF_AI_NEURON_BUDGET", "1")
+    sleeps = []
+    monkeypatch.setattr(ai, "_sleep", sleeps.append)
+    client, calls = _gemini_client([
+        httpx.Response(429, headers={"Retry-After": "2"}),
+        httpx.Response(200, json={"success": True, "result": {"response": "Traefik leaks memory.",
+                       "usage": {"prompt_tokens": 100, "completion_tokens": 10}}}),
+    ])
+    writer = ai.AIWriter(client=client, weekly=True)
+    writer.cache_dir = tmp_path
+    assert writer.prose("edit", FACTS) == "Traefik leaks memory."
+    assert writer.neurons == pytest.approx(3.86362)
+    assert sleeps == [2] and len(calls) == 2
+    assert calls[1].url.host == "api.cloudflare.com" and calls[1].url.scheme == "https"
+    assert calls[1].headers["Authorization"] == f"Bearer {cf_credentials}"
+    assert cf_credentials not in str(calls[1].url)
+    payload = json.loads(calls[1].content)
+    assert payload["temperature"] == 0.2 and payload["messages"][0]["role"] == "system"
+    assert writer.prose("another edit", FACTS) is None and len(calls) == 2
+    rerun = ai.AIWriter(client=client, weekly=True)
+    rerun.cache_dir = tmp_path
+    assert rerun.prose("edit", FACTS) == "Traefik leaks memory."
+    assert rerun.prose("another edit", FACTS) is None and len(calls) == 2 and rerun.neurons == 0
+    assert all(cf_credentials not in path.read_text() for path in tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("provider", ["cloudflare", "gemini"])
+@pytest.mark.parametrize("target", ["https://external.test/api", "http://api.cloudflare.com/"])
+def test_provider_does_not_follow_redirects(cf_credentials, monkeypatch, provider, target):
+    monkeypatch.setenv("GEMINI_API_KEY", "sentinel-gemini-token")
+    seen = []
+
+    def handler(req):
+        seen.append(req)
+        return httpx.Response(307, headers={"Location": target})
+
+    client = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=True)
+    with pytest.raises(ai.ProviderError, match="307"):
+        ai.PROVIDERS[provider]().complete("system", "user", client)
+    assert len(seen) == 1
+
+
+def test_tls_failure_falls_back_and_echo_is_rejected(cf_credentials, monkeypatch, caplog, tmp_path):
+    gemini = "sentinel-gemini-token"
+    monkeypatch.setenv("GEMINI_API_KEY", gemini)
+    calls = []
+
+    def handler(req):
+        calls.append(req.url.host)
+        if req.url.host == "api.cloudflare.com":
+            raise httpx.ConnectError(f"certificate verify failed {cf_credentials}", request=req)
+        assert req.headers["x-goog-api-key"] == gemini and "Authorization" not in req.headers
+        return httpx.Response(200, json={"candidates": [{"content": {"parts": [{"text": gemini}]}}]})
+
+    writer = ai.AIWriter(client=httpx.Client(transport=httpx.MockTransport(handler)), weekly=True)
+    writer.cache_dir = tmp_path
+    assert writer.prose("edit", FACTS) is None
+    assert writer.stats["failed"] == 1 and writer.stats["rejected"] == 1
+    assert calls == ["api.cloudflare.com", "generativelanguage.googleapis.com"]
+    assert "credential present" in caplog.text and gemini not in caplog.text and cf_credentials not in caplog.text
+    assert not list(tmp_path.iterdir())
+
+
+def test_cloudflare_trims_secret_whitespace_and_redacts_the_normalized_token(cf_credentials, monkeypatch):
+    monkeypatch.setenv("CLOUDFLARE_API_TOKEN", f"{cf_credentials}\r\n")
+    client, calls = _gemini_client([httpx.Response(
+        200, json={"success": True, "result": {"response": cf_credentials}})])
+    writer = ai.AIWriter(client=client, weekly=True)
+    assert writer.prose("edit", FACTS) is None
+    assert calls[0].headers["Authorization"] == f"Bearer {cf_credentials}"
+
+
+def test_default_transport_ignores_proxy_and_ca_environment(monkeypatch):
+    import httpx._transports.default as transport
+
+    monkeypatch.setenv("HTTPS_PROXY", "http://127.0.0.1:1")
+    monkeypatch.setenv("SSL_CERT_FILE", "/nonexistent/mitm-ca.pem")
+    create_context = transport.create_ssl_context
+    contexts = []
+
+    def inspect_context(*args, **kwargs):
+        context = create_context(*args, **kwargs)
+        contexts.append((kwargs["trust_env"], context))
+        return context
+
+    monkeypatch.setattr(transport, "create_ssl_context", inspect_context)
+    with ai.AIWriter(enabled=False, weekly=True).client as client:
+        assert not client.trust_env and not client.follow_redirects
+    assert len(contexts) == 1 and contexts[0][0] is False
+    assert contexts[0][1].check_hostname and contexts[0][1].verify_mode == ssl.CERT_REQUIRED
