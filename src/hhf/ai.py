@@ -2,7 +2,7 @@
 
 The model only rewrites supplied facts as prose. Output is rejected when it mentions a
 CVE/GHSA id, version string, URL or multi-digit number that is not in the input facts.
-Weekly defaults to Workers AI with Gemini fallback. Daily defaults to Gemini.
+Both briefings default to Workers AI with Gemini fallback.
 Keys go in headers only and are never logged.
 """
 from __future__ import annotations
@@ -14,6 +14,8 @@ import os
 import re
 import tempfile
 import time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 
@@ -29,12 +31,19 @@ DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite"
 CF_URL = "https://api.cloudflare.com/client/v4/accounts/{account}/ai/run/{model}"
 DEFAULT_CF_MODEL = "@cf/openai/gpt-oss-120b"
 CF_TITLE_MODEL = "@cf/ibm-granite/granite-4.0-h-micro"
+TIERS = {
+    "quality": (DEFAULT_CF_MODEL, "@cf/openai/gpt-oss-20b", "@cf/zai-org/glm-4.7-flash"),
+    "fast": ("@cf/openai/gpt-oss-20b", "@cf/zai-org/glm-4.7-flash", "@cf/qwen/qwen3.8-27b"),
+    "cheap": (CF_TITLE_MODEL, "@cf/meta/llama-3.2-3b-instruct"),
+}
 CF_RATES = {
     DEFAULT_CF_MODEL: (31_818, 68_182),
     CF_TITLE_MODEL: (1_542, 10_158),
     "@cf/meta/llama-3.3-70b-instruct-fp8-fast": (26_668, 204_805),
     "@cf/qwen/qwen3.8-27b": (40_909, 290_909),
     "@cf/zai-org/glm-4.7-flash": (5_500, 36_400),
+    "@cf/openai/gpt-oss-20b": (18_182, 27_273),
+    "@cf/meta/llama-3.2-3b-instruct": (4_625, 30_475),
 }
 RETRY_AFTER_CAP = 30.0
 _sleep = time.sleep
@@ -121,7 +130,9 @@ def clean_prose(text: str) -> str:
 
 # ---- providers --------------------------------------------------------------
 class ProviderError(RuntimeError):
-    pass
+    def __init__(self, message="", *, status=None):
+        super().__init__(message)
+        self.status = status
 
 
 class BudgetReached(ProviderError):
@@ -142,12 +153,19 @@ def transport_reason(exc: httpx.HTTPError) -> str:
     return "HTTP transport failure"
 
 
-def retry_once(send, provider: str):
+def retry_once(send, provider: str, *, empty=None):
     response = send()
-    if response.status_code == 429 or 500 <= response.status_code < 600:
+    if (response.status_code == 429 or 500 <= response.status_code < 600
+            or (empty and empty(response))):
+        header = response.headers.get("Retry-After", "")
         try:
-            delay = float(response.headers.get("Retry-After", ""))
+            delay = float(header)
         except ValueError:
+            try:
+                delay = (parsedate_to_datetime(header) - datetime.now(timezone.utc)).total_seconds()
+            except (ValueError, TypeError, OverflowError):
+                delay = 5.0
+        if delay != delay:
             delay = 5.0
         delay = max(0.0, min(delay, RETRY_AFTER_CAP))
         log.warning("%s HTTP %s, retrying once after %.0fs", provider, response.status_code, delay)
@@ -172,8 +190,8 @@ class Gemini(Provider):
     def available(self) -> bool:
         return bool(os.environ.get("GEMINI_API_KEY"))
 
-    def complete(self, system, user, client, max_tokens=1200):
-        model = os.environ.get("GEMINI_MODEL", DEFAULT_GEMINI_MODEL)
+    def complete(self, system, user, client, max_tokens=1200, *, model=None, attempt=None):
+        model = model or os.environ.get("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL
         if not re.fullmatch(r"[A-Za-z0-9_.-]+", model):
             raise ProviderError("invalid Gemini model")
         def send():
@@ -189,11 +207,11 @@ class Gemini(Provider):
             )
 
         try:
-            r = retry_once(send, self.name)
+            r = retry_once(lambda: attempt(send) if attempt else send(), self.name)
         except httpx.HTTPError as exc:
             raise TransportFailure(f"Gemini HTTPS request failed: {transport_reason(exc)}") from None
         if r.status_code != 200:
-            raise ProviderError(f"gemini HTTP {r.status_code}")
+            raise ProviderError(f"gemini HTTP {r.status_code}", status=r.status_code)
         parts = r.json()["candidates"][0]["content"]["parts"]
         return "".join(p.get("text", "") for p in parts)
 
@@ -210,15 +228,15 @@ class Cloudflare(Provider):
     def available(self) -> bool:
         return bool(os.environ.get("CLOUDFLARE_ACCOUNT_ID") and os.environ.get("CLOUDFLARE_API_TOKEN"))
 
-    def complete(self, system, user, client, max_tokens=1200, *, title=False):
-        model = CF_TITLE_MODEL if title else self.model
+    def complete(self, system, user, client, max_tokens=1200, *, title=False, model=None, attempt=None):
+        model = model or (CF_TITLE_MODEL if title else self.model)
         if model not in CF_RATES:
             raise ProviderError("invalid Workers AI model")
         try:
             self.budget = max(0, int(os.environ.get("CF_AI_NEURON_BUDGET") or "6000"))
         except ValueError:
             raise ProviderError("invalid Workers AI budget") from None
-        if self.neurons >= self.budget or self.usage_unknown:
+        if not attempt and (self.neurons >= self.budget or self.usage_unknown):
             raise BudgetReached()
         account = os.environ["CLOUDFLARE_ACCOUNT_ID"].strip()
         if not re.fullmatch(r"[0-9a-fA-F]{32}", account):
@@ -232,14 +250,15 @@ class Cloudflare(Provider):
                 CF_URL.format(account=account, model=model), follow_redirects=False,
                 headers={"Authorization": f"Bearer {token}"},
                 json={"messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-                      "temperature": 0.2, "max_tokens": max_tokens},
+                      "temperature": 0.2, "max_tokens": max_tokens, "stream": False},
             )
 
         try:
-            r = retry_once(send, self.name)
+            r = retry_once(lambda: attempt(send) if attempt else send(), self.name,
+                           empty=empty_cloudflare if attempt and model.startswith("@cf/openai/gpt-oss-") else None)
         except httpx.HTTPError as exc:
             raise TransportFailure(redact(f"HTTPS request failed ({model}): {transport_reason(exc)}")) from None
-        error = ProviderError(redact(f"HTTP {r.status_code} ({model})"))
+        error = ProviderError(redact(f"HTTP {r.status_code} ({model})"), status=r.status_code)
         if r.status_code != 200:
             raise error
         try:
@@ -247,12 +266,8 @@ class Cloudflare(Provider):
             result = data["result"]
             if data.get("success") is not True:
                 raise error
-            usage = result.get("usage") or {}
-            # shortcut: reserve a conservative token count when model usage is absent, use actual usage when reported
-            counts = (usage.get("prompt_tokens"), usage.get("completion_tokens"))
-            if any(type(n) is not int or n < 0 for n in counts):
-                counts = (len((system + user).encode()) + 64, max_tokens)
-            self.neurons += sum(n * rate for n, rate in zip(counts, CF_RATES[model])) / 1_000_000
+            if not attempt:
+                self.neurons += cf_cost(model, system, user, max_tokens, result.get("usage"))
             if "choices" in result:
                 choice = result["choices"][0]
                 if choice.get("finish_reason") == "length":
@@ -268,22 +283,58 @@ class Cloudflare(Provider):
             raise error from None
 
 
+def cf_cost(model, system, user, max_tokens, usage=None):
+    counts = [(usage or {}).get(field) for field in ("prompt_tokens", "completion_tokens")]
+    # shortcut: reserve one token per input byte plus framing, use measured usage when available
+    if any(type(n) is not int or n < 0 for n in counts):
+        counts = [len((system + user).encode()) + 64, max_tokens]
+    return sum(n * rate for n, rate in zip(counts, CF_RATES[model])) / 1_000_000
+
+
+def empty_cloudflare(response):
+    try:
+        data = response.json()
+        result = data["result"]
+        return (response.status_code == 200 and data.get("success") is True
+                and "choices" not in result and not (result.get("response") or "").strip())
+    except (ValueError, KeyError, TypeError, AttributeError):
+        return False
+
+
+def tier_models(tier):
+    override = tuple(m.strip() for m in os.environ.get(f"CF_AI_MODEL_{tier.upper()}", "").split(",") if m.strip())
+    defaults = TIERS[tier]
+    return tuple(dict.fromkeys((*override, *defaults[(1 if override else 0):])))
+
+
+def print_calls(calls):
+    if calls:
+        print("tier | provider | model | status | ms | neurons")
+        for call in calls:
+            print(redact(" | ".join(str(call[key]) for key in ("tier", "provider", "model", "status", "ms", "neurons"))))
+
+
 PROVIDERS: dict[str, type[Provider]] = {"cloudflare": Cloudflare, "gemini": Gemini}
 
 
 class AIWriter:
     def __init__(self, providers: list[Provider] | None = None, enabled: bool = True,
-                 client: httpx.Client | None = None, *, weekly: bool = False):
+                 client: httpx.Client | None = None, *, weekly: bool = False, daily: bool = False):
         if providers is None and enabled:
-            default = "cloudflare,gemini" if weekly else "gemini"
-            names = [n.strip() for n in os.environ.get("AI_PROVIDERS", default).split(",") if n.strip()]
+            default = "cloudflare,gemini" if weekly or daily else "gemini"
+            names = [n.strip() for n in (os.environ.get("AI_PROVIDERS") or default).split(",") if n.strip()]
             providers = [PROVIDERS[n]() for n in names if n in PROVIDERS]
         self.providers = [p for p in providers or [] if p.available()] if enabled else []
-        self.client = client or httpx.Client(timeout=45.0, headers={"User-Agent": USER_AGENT},
+        self.client = client or httpx.Client(timeout=30.0 if daily else 45.0, headers={"User-Agent": USER_AGENT},
                                              trust_env=False, follow_redirects=False)
         self.stats = {"ok": 0, "rejected": 0, "failed": 0, "provider": None}
         self.cache_dir: Path | None = None
         self.weekly = weekly
+        self.daily = daily
+        self.calls = []
+        self.disabled = set()
+        self.failures = {}
+        self.budget_exhausted = False
 
     @property
     def neurons(self) -> float:
@@ -294,7 +345,7 @@ class AIWriter:
         return bool(self.providers)
 
     def prose(self, instruction: str, facts: Any, max_chars: int = 900, allow: Any = None,
-              *, title=False, validate=None) -> str | None:
+              *, title=False, validate=None, tier=None, max_tokens=None) -> str | None:
         """Return guarded prose or None (caller must use its deterministic fallback).
 
         `allow` is extra fact data (dates, full advisory fields, ...) that only widens the guard.
@@ -307,7 +358,7 @@ class AIWriter:
             self.stats["rejected"] += 1
             log.warning("AI input rejected: credential present")
             return None
-        fields = list(fact_fields([facts, allow])) if self.weekly else None
+        fields = list(fact_fields([facts, allow])) if self.weekly or tier else None
         guard_text = "\n".join(fields) if fields is not None else facts_text + "\n" + (
             allow if isinstance(allow, str) else json.dumps(allow, ensure_ascii=False, sort_keys=True, default=str))
 
@@ -319,10 +370,12 @@ class AIWriter:
                 return None, ["credential present"]
             if not text or len(text) > max_chars:
                 return None, ["empty or over length"]
-            bad = violations(raw if self.weekly else text, guard_text, fields=fields)
-            if self.weekly:
+            bad = violations(raw if fields is not None else text, guard_text, fields=fields)
+            if self.weekly or tier:
                 if URL_RE.search(text) or re.search(r"(?m)^\s*(?:[-*+]\s|\d+[.)]\s|\|)|\]\(|<[/!A-Za-z]", raw):
                     bad.append("links or markdown structure not allowed")
+            if tier and re.search(r"\*\*|__|~~|`|(?<!\w)[*_][^\s]+[*_](?!\w)", raw):
+                bad.append("inline markdown not allowed")
             if not bad and validate:
                 text = validate(text)
                 if not text:
@@ -335,14 +388,17 @@ class AIWriter:
                 bad.append(f"repeated fragment {fragment}")
             return text, bad
 
+        candidates = self.candidates(tier) if tier else []
         cache = None
         if self.cache_dir is not None:
             models = [(p.name, (CF_TITLE_MODEL if title else p.model) if isinstance(p, Cloudflare)
                        else os.environ.get("GEMINI_MODEL", DEFAULT_GEMINI_MODEL) if isinstance(p, Gemini)
                        else p.name) for p in self.providers]
-            digest = hashlib.sha256(json.dumps([2, SYSTEM_PROMPT, user, guard_text, models, max_chars],
+            if tier:
+                models = [(p.name, model) for p, model in candidates]
+            digest = hashlib.sha256(json.dumps([3, SYSTEM_PROMPT, user, guard_text, models, max_chars, tier, max_tokens, 0.2],
                                                ensure_ascii=False).encode()).hexdigest()
-            cache = self.cache_dir / f"{digest}.json"
+            cache = self.cache_dir / (tier or "") / f"{digest}.json"
             try:
                 stored = json.loads(cache.read_text(encoding="utf-8"))
                 raw, provider = stored["text"], stored["provider"]
@@ -374,6 +430,33 @@ class AIWriter:
                         tmp.unlink(missing_ok=True)
                     except OSError:
                         log.warning("AI cache temporary file cleanup failed")
+
+        if tier:
+            rejected = False
+            for p, model in candidates:
+                if self.budget_exhausted:
+                    break
+                if p.name in self.disabled or self.failures.get((p.name, model), 0) >= 3:
+                    continue
+                raw = self.try_model(p, model, tier, SYSTEM_PROMPT, user, max_tokens or 220)
+                if raw is None:
+                    if rejected:  # one alternate model after a guard rejection
+                        break
+                    continue
+                text, bad = check(raw)
+                if bad:
+                    self.calls[-1]["status"] = "rejected"
+                    self.stats["rejected"] += 1
+                    log.warning("AI %s output rejected: %s", redact(model), redact(", ".join(bad[:3])))
+                    if rejected:
+                        break
+                    rejected = True
+                    continue
+                self.stats.update(ok=self.stats["ok"] + 1, provider=p.name)
+                remember(text, p.name)
+                return text
+            remember(None, None)
+            return None
 
         transport_failed = False
         for p in self.providers:
@@ -412,9 +495,88 @@ class AIWriter:
             "Choose the single best category for the item. Answer with exactly one of: "
             + ", ".join(options) + ".",
             {"item": text[:1500], "options": options}, max_chars=40,
+            **({"tier": "cheap", "max_tokens": 24,
+                "validate": lambda value: value.lower().strip(".") if value.lower().strip(".") in options else None}
+               if self.daily else {}),
         )
         if out:
             token = out.strip().lower().strip(".")
             if token in options:
                 return token
         return None
+
+    def candidates(self, tier):
+        return [(p, model) for p in self.providers for model in (
+            tier_models(tier) if isinstance(p, Cloudflare) else
+            (os.environ.get("GEMINI_MODEL") or DEFAULT_GEMINI_MODEL,) if isinstance(p, Gemini) else (p.name,)
+        )]
+
+    def try_model(self, provider, model, tier, system, user, max_tokens):
+        key = provider.name, model
+        started = time.monotonic()
+        previous_calls = len(self.calls)
+
+        def record(status, start, neurons=0):
+            self.calls.append({"tier": tier, "provider": provider.name, "model": redact(model), "status": status,
+                               "ms": round((time.monotonic() - start) * 1000), "neurons": round(neurons, 6)})
+
+        def attempt(send):
+            cf = isinstance(provider, Cloudflare)
+            if cf:
+                try:
+                    budget = max(0, int(os.environ.get("CF_AI_NEURON_BUDGET") or "2000"))
+                except ValueError:
+                    raise ProviderError("invalid Workers AI budget") from None
+                projected = cf_cost(model, system, user, max_tokens)
+                if self.neurons + projected > budget:
+                    raise BudgetReached()
+            start = time.monotonic()
+            try:
+                response = send()
+            except httpx.HTTPError:
+                record("transport", start)
+                raise
+            cost = 0
+            status = response.status_code
+            if cf and status == 200:
+                try:
+                    usage = response.json()["result"].get("usage")
+                    usage = usage if isinstance(usage, dict) else None
+                except (ValueError, KeyError, TypeError, AttributeError):
+                    usage = None
+                cost = cf_cost(model, system, user, max_tokens, usage)
+                provider.neurons += cost
+                if empty_cloudflare(response):
+                    status = "empty"
+            record(status, start, cost)
+            return response
+
+        try:
+            if self.daily and tier != "quality" and model == DEFAULT_CF_MODEL:
+                raise ProviderError("quality model is not available to daily")
+            if isinstance(provider, (Cloudflare, Gemini)):
+                raw = provider.complete(system, user, self.client, max_tokens=max_tokens, model=model, attempt=attempt)
+            else:
+                raw = provider.complete(system, user, self.client, max_tokens=max_tokens)
+                record("ok", started)
+            if not isinstance(raw, str) or not raw.strip():
+                raise ProviderError("empty response", status="empty")
+        except BudgetReached:
+            self.budget_exhausted = True
+            record("budget", started)
+            return None
+        except (ProviderError, httpx.HTTPError, ValueError, KeyError, TypeError, IndexError, AttributeError) as exc:
+            status = getattr(exc, "status", None)
+            if len(self.calls) == previous_calls:
+                record(status or "invalid", started)
+            elif self.calls[-1]["status"] == 200:
+                self.calls[-1]["status"] = status if status in ("empty",) else "invalid"
+            if status in (401, 403):
+                self.disabled.add(provider.name)
+            self.stats["failed"] += 1
+            self.failures[key] = self.failures.get(key, 0) + 1
+            log.warning("AI %s %s failed (%s)%s", provider.name, redact(model), self.calls[-1]["status"],
+                        " (circuit opened)" if self.failures[key] == 3 else "")
+            return None
+        self.failures.pop(key, None)
+        return raw
