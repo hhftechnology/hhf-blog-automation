@@ -142,6 +142,30 @@
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2026-109445": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-14",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-14",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-109445",
+      "https://www.planet.com.tw/en/support/security-advisory/12",
+      "https://www.vulncheck.com/advisories/planet-gs-5220-8p2t2s-stack-buffer-overflow-via-webstax-auth-cookie"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-110697": {
     "cvss": {
       "score": 9.9,
@@ -239,6 +263,37 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-111793"
     ],
     "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-114713": {
+    "cvss": {
+      "score": 8.6,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-13",
+      "percentile": 0.23297,
+      "score": 0.00302
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-14",
+    "kev": true,
+    "kevDateAdded": "2026-11-13",
+    "kevDueDate": "2026-11-16",
+    "lastUpdated": "2026-11-14",
+    "product": "UnrealIRCd UnrealIRCd",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-114713",
+      "https://forums.unrealircd.org/viewtopic.php?t=9487",
+      "https://www.unrealircd.org/",
+      "https://www.unrealircd.org/index/news",
+      "http://www.openwall.com/lists/oss-security/2026/11/08/1",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-114713"
+    ],
+    "status": "Undergoing Analysis",
     "verification": "nvd+kev"
   },
   "CVE-2026-116606": {
@@ -479,19 +534,24 @@
       "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
       "version": "3.1"
     },
-    "epss": null,
-    "exploitation": "source-reported",
+    "epss": {
+      "date": "2026-11-13",
+      "percentile": 0.70349,
+      "score": 0.01274
+    },
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-13",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-13",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-13",
+    "kevDueDate": "2026-11-16",
+    "lastUpdated": "2026-11-14",
+    "product": "Check Point Multiple Products",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-123039",
-      "https://support.checkpoint.com/results/sk/sk1000362"
+      "https://support.checkpoint.com/results/sk/sk1000362",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-123039"
     ],
-    "status": "Awaiting Analysis",
+    "status": "Undergoing Analysis",
     "verification": "nvd+kev"
   },
   "CVE-2026-123158": {
@@ -757,6 +817,30 @@
     "status": "Analyzed",
     "verification": "nvd+kev"
   },
+  "CVE-2026-126173": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-14",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-14",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-126173",
+      "https://automatorwp.com/",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/04ea5758-2400-4885-8342-c57d61206ef1?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-126325": {
     "cvss": {
       "score": 9.2,
@@ -800,6 +884,33 @@
       "https://nvd.nist.gov/vuln/detail/CVE-2026-126378",
       "https://github.com/givanz/Vvveb/security/advisories/GHSA-xpgr-r6c8-3hpq",
       "https://www.vulncheck.com/advisories/vvveb-through-1.0.8.6-webshell-upload-via-theme-installer-validfile-bypass"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-129110": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-14",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-14",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129110",
+      "https://github.com/OpusProjects/sysPass/pull/360",
+      "https://github.com/nuxsmin/sysPass",
+      "https://github.com/nuxsmin/sysPass/blob/3.2.11/app/modules/web/Controllers/InstallController.php#L80-L110",
+      "https://github.com/nuxsmin/sysPass/issues/1954",
+      "https://www.vulncheck.com/advisories/syspass-3.0.1-through-3.2.11-unauthenticated-reinstallation-rce-via-install-install"
     ],
     "status": "Deferred",
     "verification": "nvd+kev"
@@ -882,6 +993,33 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-20320"
     ],
     "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-6460": {
+    "cvss": {
+      "score": 8.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-13",
+      "percentile": 0.48785,
+      "score": 0.0059
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-14",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-14",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-6460",
+      "https://www.postgresql.org/support/security/CVE-2026-6460/"
+    ],
+    "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
   "CVE-2026-6715": {
