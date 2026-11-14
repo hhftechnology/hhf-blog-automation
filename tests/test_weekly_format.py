@@ -102,10 +102,10 @@ def test_golden_structure(golden_fx):
     assert r["title"] == "🚨 Weekly Self-Hosted Security Summary (October 29 – November 4, 2026)"
     lines = raw.split("\n")
 
-    # intro: counts advisories, singular/plural, missed project names, edge then patch-fast skeleton
-    m = re.match(r"^Here’s a roundup of \*\*(\d+) critical/high security issues\*\* disclosed this week affecting popular "
-                 r"open-source self-hosted projects, plus \*\*1 earlier advisory for Keycloak\*\* we hadn’t covered yet "
-                 r"\(see \*Missed Earlier\*\)\. Start with your edge: (.+)\.( Then patch fast: .+\.)?$", lines[0])
+    # The intro counts numbered items and names the earlier project.
+    m = re.match(r"^Here’s a roundup of \*\*(\d+) self-hosted security items\*\* covering new disclosures and newly listed exploitation, "
+                 r"plus \*\*1 earlier advisory for Keycloak\*\* we hadn’t covered yet "
+                 r"\(see \*Missed Earlier\*\)\. Start with your edge: (.+)\.$", lines[0])
     assert m, lines[0]
     assert int(m.group(1)) == 3  # numbered items (Traefik, BIND, Caddy), not the 7 advisories behind them
     assert "Start with your edge: Start with your edge" not in raw
@@ -128,7 +128,7 @@ def test_golden_structure(golden_fx):
     assert "* **Fixed** : v2.11.61, v3.7.17" in t
     assert "| CVE | CVSS | Exploitation | EPSS | Action |\n|---|---|---|---|---|\n| GHSA-xv5x-242w-7hf7 | 7.5 | None known | N/A | Patch this week |" in t
     assert "**Remediation Steps**\n\n1. " in t
-    assert "\n3. Review recent logs" in t and "\n4. Verify:" in t
+    assert "Review recent logs" in t and "Verify:" in t
     assert "**Official References**\n\n- Vendor advisory: https://" in t
     assert "\n**Reference** : [GHSA-xv5x-242w-7hf7](https://github.com/traefik/traefik/security/advisories/GHSA-xv5x-242w-7hf7)\n" in t
 
@@ -275,6 +275,43 @@ def test_group_caps_and_leftovers(golden_fx):
     assert all(row["url"] for row in overflow)
 
 
+def test_urgency_ranks_project_leads_and_cve_rows():
+    def advisory(num, *, project="Proxy", severity="high", cvss=8.0, category="edge", epss=0.0):
+        cve = f"CVE-2026-{num}"
+        return Advisory(key=cve, project=project, title="Affects the service", cves=[cve], severity=severity,
+                        cvss=cvss, category=category, epss={cve: (epss, 0.9)})
+
+    critical = advisory(1001, severity="critical", cvss=9.8)
+    urgent = advisory(1002, epss=0.64)
+    known = advisory(1003, project="App", category="app", severity="medium", cvss=5.0)
+    known.cves.insert(0, "CVE-2026-1000")
+    known.kev[known.key] = {"dateAdded": "2026-11-02"}
+    assert sorted([critical, urgent, known], key=weekly.sort_key) == [known, urgent, critical]
+    groups = weekly.group_advisories([critical, urgent, known])
+    assert groups[1].primary is urgent
+    row = weekly.table_rows(groups[0], cap=1)[0]
+    assert row["cve"] == known.key and row["action"] == known.action() == "Patch now"
+
+
+def test_build_records_only_displayed_ids(golden_fx, monkeypatch, caplog):
+    stamp = datetime(2026, 11, 2, tzinfo=timezone.utc)
+    def advisory(num, project):
+        cve = f"CVE-2026-{num}"
+        return Advisory(key=cve, cves=[cve], title="Service process stops", project=project, severity="high",
+                        cvss=8.0, published=stamp)
+
+    records = [advisory(1000 + i, "Main") for i in range(7)]
+    records += [advisory(2000, "Overflow"), advisory(2001, "Overflow"), advisory(3000, "Below cap")]
+    monkeypatch.setattr(weekly, "collect", lambda *a, **kw: (records, [], {}))
+    monkeypatch.setattr(weekly, "MAX_MAIN", 1)
+    monkeypatch.setattr(weekly, "MAX_OVERFLOW", 1)
+    with caplog.at_level("INFO", logger="hhf.weekly"):
+        r = build(golden_fx)
+    assert set(r["ids"]) == {f"CVE-2026-{i}" for i in (1000, 1001, 1002, 1003, 1004, 2000)}
+    assert "CVE-2026-2000 | Overflow | CVSS >= 7.0 | disclosed in window | Patch this week | overflow 1" in caplog.text
+    assert "CVE-2026-3000 | Below cap | CVSS >= 7.0 | disclosed in window | Patch this week | not displayed" in caplog.text
+
+
 def test_title_cleanup():
     names = ["Traefik"]
     assert strip_project("Traefik has an unauthenticated memory/FD exhaustion bug", names) == "unauthenticated memory/FD exhaustion bug"
@@ -393,10 +430,11 @@ def test_ubuntu_form_needs_release_packages(golden_fx, monkeypatch):
 
 def test_intro_counts_items_and_names_at_most_three_projects():
     intro = weekly.build_intro(11, 2, ["imgproxy", "Keycloak", "Gitea", "X"], ["Traefik has an unauthenticated bug"], ["WordPress has an RCE"])
-    assert intro.startswith("Here’s a roundup of **11 critical/high security issues** disclosed this week affecting popular "
-                            "open-source self-hosted projects, plus **2 earlier advisories for imgproxy, Keycloak and Gitea** we hadn’t covered yet "
-                            "(see *Missed Earlier*). Start with your edge: Traefik has an unauthenticated bug. Then patch fast: WordPress has an RCE.")
-    assert "plus" not in weekly.build_intro(1, 0, [], ["a"], []) and "**1 critical/high security issue**" in weekly.build_intro(1, 0, [], ["a"], [])
+    assert "**11 self-hosted security items**" in intro
+    assert "plus **2 earlier advisories for imgproxy, Keycloak and Gitea**" in intro and " and X" not in intro
+    assert intro.endswith("Patch first: WordPress has an RCE. Next, check your edge: Traefik has an unauthenticated bug.")
+    single = weekly.build_intro(1, 0, [], ["a"], [])
+    assert "plus" not in single and "**1 self-hosted security item**" in single
 
 
 def test_clause_phrases():
@@ -563,7 +601,7 @@ def test_kev_entry_in_window_becomes_the_first_item(tmp_path):
     assert re.search(r"^### \*\*1\. WordPress: ", raw, re.M)
     assert "**CVE-2026-119977** | Disclosed: October 28, 2026 (added to CISA KEV November 3)" in raw
     assert "* **Severity** : High (CVSS 8.1), on CISA KEV" in raw
-    assert "* **Workaround** : None published. Upgrade." in raw and "vendor instructions" not in raw  # CISA boilerplate is never shown
+    assert "* **Workaround** : None listed in the advisory." in raw and "vendor instructions" not in raw
     assert "* **Affected** : 4.7 – 7.1.3" in raw
     assert "* **Fixed** : 7.1.4, 7.0.8, 6.9.11, 6.8.12 (and backports)" in raw
     assert "No fix yet" not in raw and "no tagged" not in raw.lower()
@@ -577,6 +615,26 @@ def test_kev_entry_outside_window_or_unknown_vendor_is_ignored(tmp_path):
     assert r.get("empty") is True
 
 
+def test_collect_excludes_later_disclosures_kev_and_epss(golden_fx, monkeypatch):
+    from hhf.sources import epss, kev
+
+    target = {**GHSAS[0], "cve_id": "CVE-2026-5551"}
+    last_minute = {**target, "ghsa_id": "GHSA-aaaa-bbbb-5678", "cve_id": "CVE-2026-5552",
+                   "published_at": "2026-11-04T23:59:59Z"}
+    later = {**target, "ghsa_id": "GHSA-abcd-efgh-1234", "cve_id": "CVE-2026-5553",
+             "published_at": "2026-11-05T00:00:00Z"}
+    monkeypatch.setattr(ghsa_src, "global_advisories", lambda *a, **kw:
+                        [ghsa_src.normalize(row) for row in (target, last_minute, later)])
+    future_kev = {"dateAdded": "2026-11-05", "vendorProject": "Traefik Labs", "product": "Traefik"}
+    monkeypatch.setattr(kev, "load", lambda *a: {target["cve_id"]: future_kev})
+    seen = []
+    monkeypatch.setattr(epss, "lookup", lambda *a, as_of: seen.append(as_of) or {})
+    main, missed, _ = weekly.collect(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, projects=WL, posted={})
+    assert {a.cves[0] for a in main if a.project == "Traefik"} == {target["cve_id"], last_minute["cve_id"]}
+    assert all(not a.is_kev and later["cve_id"] not in a.cves for a in main + missed)
+    assert seen == [date(2026, 11, 4)]
+
+
 def test_posted_ids_are_excluded_everywhere(golden_fx):
     posted = {"GHSA-xv5x-242w-7hf7": "2026-11-04", "CVE-2026-94300": "2026-11-04", "GHSA-j97h-3f8r-mrjr": "2026-11-04"}
     r = weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, writer=ai.AIWriter(enabled=False), projects=WL,
@@ -584,7 +642,7 @@ def test_posted_ids_are_excluded_everywhere(golden_fx):
     raw = r["raw"]
     assert "GHSA-xv5x-242w-7hf7" not in raw and "Keycloak" not in raw and "## Missed Earlier" not in raw
     assert "**CVE-2026-19630**" in raw  # the other BIND CVEs were not posted, so they still appear
-    assert raw.count("\n### **") == 2 and raw.startswith("Here’s a roundup of **2 critical/high security issues**")
+    assert raw.count("\n### **") == 2 and raw.startswith("Here’s a roundup of **2 self-hosted security items**")
 
 
 def test_posted_duplicates_by_cve_or_ghsa_are_skipped(mock_fx):
@@ -595,9 +653,9 @@ def test_posted_duplicates_by_cve_or_ghsa_are_skipped(mock_fx):
 
 def test_intro_omits_empty_sentences():
     only_fast = weekly.build_intro(2, 0, [], [], ["WordPress has an RCE"])
-    assert "Start with your edge" not in only_fast and "flagged" not in only_fast and only_fast.endswith("Then patch fast: WordPress has an RCE.")
+    assert "Start with your edge" not in only_fast and only_fast.endswith("Patch first: WordPress has an RCE.")
     neither = weekly.build_intro(1, 0, [], [], [])
-    assert neither.endswith("self-hosted projects.") and "Then patch fast" not in neither
+    assert neither.endswith("newly listed exploitation.") and "Patch first" not in neither
     assert weekly.build_intro(1, 0, [], ["A has a bug"], []).endswith("Start with your edge: A has a bug.")
 
 
@@ -727,8 +785,9 @@ def test_no_fix_claims_need_explicit_evidence():
     weekly.resolve_fixed(c, None)
     v = weekly.view(weekly.Group("P", [c]), "p")
     assert "* **Fixed**" not in v["fixed"] and v["fixed"] == "Fixed upstream in commit abc1234. Check the latest release."
-    assert "Upgrade to the latest release (the fix is in commit abc1234)." in v["steps"]
+    assert v["steps"][0] == "Use a vendor release that includes fix commit abc1234. Check the release notes before upgrading."
     vb = weekly.view(weekly.Group("P", [b]), "p")
+    assert vb["steps"][0] == "Check the P advisory for a confirmed fixed version before upgrading."
     assert "no fix yet" not in (vb["fixed"] + " ".join(vb["steps"])).lower() and all("ships" not in step for step in vb["steps"])
 
 
@@ -738,7 +797,7 @@ def test_kev_boilerplate_is_never_a_workaround():
          "requiredAction": "Apply mitigations in accordance with vendor instructions, ensuring compliance with BOD 26-04."}
     weekly.finalize(a, {}, None, {"CVE-1": e}, {}, {})
     assert a.is_kev and a.workaround == ""
-    assert weekly.view(weekly.Group("WordPress", [a]), "p")["workaround"] == "None published. Upgrade."
+    assert weekly.view(weekly.Group("WordPress", [a]), "p")["workaround"] == "None listed in the advisory."
     b = Advisory(key="CVE-2", title="t", project="WordPress", cves=["CVE-2"], kev_aliases=[{"product": "WordPress"}])
     weekly.finalize(b, {}, None, {"CVE-2": {**e, "cveID": "CVE-2", "requiredAction": "Disable the plugin until a patch ships."}}, {}, {})
     assert b.workaround == "Disable the plugin until a patch ships."

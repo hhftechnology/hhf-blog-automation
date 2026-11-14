@@ -196,7 +196,7 @@ class Advisory:
         return max(self.epss.values(), key=lambda t: t[0])
 
     def action(self) -> str:
-        return action_for(self.is_kev, self.max_epss[0], self.cvss)
+        return action_for(self.is_kev, self.max_epss[0], self.cvss, self.severity)
 
     def rows(self) -> list[dict]:
         """One table row per CVE (or one placeholder row when there is no CVE yet)."""

@@ -19,6 +19,12 @@ def test_epss_lookup(mock_fx):
     assert m["CVE-2026-1111"] == (0.64, 0.985)
 
 
+def test_epss_historical_date_omits_later_scores(mock_fx):
+    result = epss.lookup(["CVE-2026-1111"], mock_fx, as_of=date(2026, 11, 5))
+    assert result == {}
+    assert mock_fx.handler.calls[-1].url.params["date"] == "2026-11-05"
+
+
 def test_nvd_normalize_and_window(mock_fx):
     recs = nvd.fetch_window(datetime(2026, 11, 1, tzinfo=timezone.utc), datetime(2026, 11, 7, tzinfo=timezone.utc), fx=mock_fx)
     by = {r["id"]: r for r in recs}

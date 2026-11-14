@@ -29,19 +29,20 @@ def test_weekly_end_to_end(mock_fx):
     assert r["tags"] == ["security", "cve", "weekly-security", "self-hosted"]
     assert r["external_id"] == "weekly-advisory-2026-11-07"
     assert raw.startswith("Here’s a roundup of **")
-    assert "Start with your edge:" in raw and "(see *Missed Earlier*)" in raw
+    assert "Patch first:" in raw and "Next, check your edge:" in raw and "(see *Missed Earlier*)" in raw
     # reference layout
     assert "### **1. " in raw and "**Technical Details** :" in raw and "* **Severity** : " in raw
     assert "| CVE | CVSS | Exploitation | EPSS | Action |" in raw
     assert "**Remediation Steps**\n\n1. " in raw and "**Reference** : [" in raw and "**Official References**" in raw
     assert "## Missed Earlier" in raw and "## Sources" in raw and "Key Takeaways" not in raw
     # KEV item first, with CVE row + action
-    assert "### **1. Keycloak" in raw and "### **2. Traefik" in raw
+    assert "### **1. Keycloak" in raw and "### **2. Nextcloud" in raw
     assert "| CVE-2026-1111 | 9.8 | Known exploited (CISA KEV) | 64.0% (99th percentile) | Patch now |" in raw
     # GHSA without CVE
     assert "(no CVE yet)" in raw and "| GHSA-xv5x-242w-7hf7 | 7.5 | None known | N/A | Patch this week |" in raw
     # upgrade command from the watchlist image, workaround, USN, NVD references
     assert "`docker pull traefik:3.6.2`" in raw and "Disable the Negotiate header" in raw
+    assert "update the image tag in your Compose file" in raw and "recreate the container with the fixed image" in raw
     assert "https://ubuntu.com/security/notices/USN-9000-1" in raw and "https://nvd.nist.gov/vuln/detail/CVE-2026-1111" in raw
     # unrelated GHSA excluded, NVD-only Nextcloud included (CVSS 8.8, EPSS 0.12 -> 72h, public PoC)
     assert "left-pad" not in raw and "Unrelated" not in raw

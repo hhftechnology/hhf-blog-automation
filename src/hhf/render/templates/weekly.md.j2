@@ -11,7 +11,7 @@
 ### Also disclosed this week
 
 {% for row in overflow %}
-- {{ row.title | md }} ({{ row.id | md }}; {{ row.severity | md }}) {{ row.url }}
+- {{ row.title | md }} ({{ row.id | md }}; {{ row.severity | md }}; {{ row.action }}) {{ row.url }}
 {% endfor %}
 
 ---
@@ -20,7 +20,7 @@
 {% if missed %}
 ## Missed Earlier
 
-These came out before this week and weren’t in an earlier summary. They only reached the GitHub global advisory database this week.
+These were disclosed before the reporting window and haven’t been covered in an earlier summary.
 
 {% for it in missed %}
 {% with n = items | length + loop.index %}

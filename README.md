@@ -8,6 +8,10 @@ Automation behind the HHF blog's threat content:
 
 Both pipelines publish through `src/hhf/publish.py`, which is idempotent on the topic `external_id`: a rerun republishes the same article instead of creating a duplicate.
 
+The weekly issue matches advisories against the watchlist by repository, package, or vendor and product. It covers new High and Critical disclosures, CVSS scores of 7.0 or higher, and matched CISA KEV entries. Known exploitation leads, followed by patch urgency, severity, edge and identity services, and CVSS. The same rules pick each project's lead advisory. Historical runs use EPSS from the reporting date. The job log records each advisory's eligibility, priority and placement, and only displayed IDs count as covered.
+
+Weekly technical details describe the affected component, impact, and documented prerequisites. The remediation steps use source facts and include deployment-specific guidance when available, such as updating the Compose image tag and recreating the affected service.
+
 ## Disclaimer
 
 Articles are AI-assisted, published automatically and **not human-reviewed**. Verify with vendors before acting. Facts come from the sources below; AI text is rejected by a fact-check guard when it adds ids, versions, URLs or numbers that are not in the input, and is then replaced by deterministic text. Without an AI key, the briefing never copies publisher text: it shows the headline and a link to the full report.

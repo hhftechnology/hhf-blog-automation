@@ -30,8 +30,10 @@ log = logging.getLogger("hhf.weekly")
 ROOT = Path(__file__).resolve().parents[2]
 TAGS = ["security", "cve", "weekly-security", "self-hosted"]
 MAX_MAIN, MAX_MISSED = 11, 3
+MAX_OVERFLOW = 10
 MAX_CHARS = 30000  # stay under Discourse max_post_length (32000)
 SEV_RANK = {"critical": 4, "high": 3, "medium": 2, "low": 1}
+ACTION_RANK = {"Patch now": 0, "Patch within 72h": 1, "Patch this week": 2}
 
 
 # ---- watchlist --------------------------------------------------------------
@@ -130,7 +132,7 @@ def _dt(s: str | None) -> datetime | None:
     if not s:
         return None
     d = datetime.fromisoformat(s.replace("Z", "+00:00"))
-    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    return d.astimezone(timezone.utc) if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
 
 def split_versions(raw: list[str]) -> tuple[list[str], list[str]]:
@@ -451,8 +453,9 @@ def merge_by_cve(items: list[Advisory]) -> list[Advisory]:
 
 # ---- grouping ---------------------------------------------------------------------
 def sort_key(a: Advisory):
-    cat = {"edge": 0, "identity": 1}.get(a.category, 2)  # edge first within a severity tier
-    return (not a.is_kev, -SEV_RANK.get(a.severity or "", 0), cat, -(a.cvss or 0), not a.cves, a.project.lower())
+    category = {"edge": 0, "identity": 1}.get(a.category, 2)
+    return (not a.is_kev, ACTION_RANK[a.action()], -SEV_RANK.get(a.severity or "", 0),
+            category, -(a.cvss or 0), adv_id(a), a.project.casefold(), a.key)
 
 
 @dataclass
@@ -479,10 +482,6 @@ class Group:
     @property
     def is_kev(self) -> bool:
         return any(a.is_kev for a in self.advs)
-
-    @property
-    def max_cvss(self) -> float:
-        return max((a.cvss or 0) for a in self.advs)
 
     def add(self, a: Advisory) -> None:
         self.advs.append(a)
@@ -515,16 +514,16 @@ def group_advisories(items: list[Advisory]) -> list[Group]:
 
 def ubuntu_info(g: Group) -> dict | None:
     """Per-release fixed package versions when a USN ships a package of a watched project (else None: keep the project form)."""
-    for a in g.advs:
-        for usn_id, info in a.usn_info.items():
-            fixed, pkg = {}, None
-            for rel, pkgs in (info.get("packages") or {}).items():
-                for name, ver in pkgs:
-                    if name in a.ubuntu_packages:
-                        fixed[rel], pkg = ver, name
-            if fixed and pkg:
-                return {"pkg": pkg, "usn": usn_id, "fixed": fixed, "published": _dt(info.get("published")),
-                        "service": a.ubuntu_service, "upstream": a.affected}
+    a = g.primary
+    for usn_id, info in a.usn_info.items():
+        fixed, pkg = {}, None
+        for rel, pkgs in (info.get("packages") or {}).items():
+            for name, ver in pkgs:
+                if name in a.ubuntu_packages:
+                    fixed[rel], pkg = ver, name
+        if fixed and pkg:
+            return {"pkg": pkg, "usn": usn_id, "fixed": fixed, "published": _dt(info.get("published")),
+                    "service": a.ubuntu_service, "upstream": a.affected}
     return None
 
 
@@ -559,7 +558,7 @@ def _sentence(t: str) -> str:
 
 
 def remediation_steps(g: Group) -> list[str]:
-    """2 to 3 specific steps for the item's primary advisory."""
+    """Operator instructions for the primary advisory and its deployment evidence."""
     a = g.primary
     steps = []
     if g.ubuntu:
@@ -567,23 +566,29 @@ def remediation_steps(g: Group) -> list[str]:
         steps.append("Update the package with `sudo apt update && sudo apt upgrade`" +
                      (f", then restart the service (`sudo systemctl restart {svc}`)." if svc else " and restart the affected service."))
     elif a.fixed_version and "," in a.fixed:
-        steps.append(f"Upgrade {g.label} to the fixed release for your branch ({a.fixed}).")
+        steps.append(f"Upgrade {a.project} to the fixed release for your branch ({a.fixed}).")
+        if a.image:
+            steps.append("For containers, select the fixed image tag in your deployment and recreate the affected container.")
     elif a.fixed_version:
         cmd = upgrade_command(a)
-        cmd = "" if len({x.project for x in g.advs}) > 1 else cmd  # a grouped item spans projects: no single command
-        steps.append(f"Upgrade {g.label} to {a.fixed_version}" + (f" (`{cmd}`)." if cmd else "."))
+        steps.append(f"Upgrade {a.project} to {a.fixed_version}" + (f" (`{cmd}`)." if cmd else "."))
+        if a.image:
+            steps.append("For Docker Compose, update the image tag in your Compose file, then run "
+                         "`docker compose pull SERVICE` and `docker compose up -d SERVICE` with your service name. "
+                         "For standalone Docker, recreate the container with the fixed image and keep its volumes and settings.")
     elif a.fix_commit:
-        steps.append(f"Upgrade to the latest release (the fix is in commit {a.fix_commit}).")
+        steps.append(f"Use a vendor release that includes fix commit {a.fix_commit}. Check the release notes before upgrading.")
     elif a.unpatched:
         steps.append(f"The advisory lists no fix yet, so watch the vendor advisory for {g.label} and upgrade as soon as one ships.")
     else:
-        steps.append(f"Upgrade {g.label} to the latest release and check the vendor release notes for the fixed version.")
+        steps.append(f"Check the {a.project} advisory for a confirmed fixed version before upgrading.")
     if a.workaround:
         steps.append(f"Until you can upgrade: {_sentence(a.workaround)}")
     else:
-        steps.append(f"Until you can upgrade, limit network access to {g.display} to trusted hosts (VPN or allow-list).")
-    if g.is_kev:
-        steps.append("This is exploited in the wild: patch today and check for signs of compromise.")
+        steps.append("If the affected service is reachable over the network, restrict access to trusted hosts "
+                     "(VPN or allow-list) while you verify and apply the fix.")
+    if a.is_kev:
+        steps.append("CISA lists this issue as known exploited. Prioritize the vendor fix and review for signs of compromise.")
     steps.append("Review recent logs of the affected service for unusual requests before and after patching.")
     if g.ubuntu:
         steps.append("Verify: after the restart, confirm the installed package matches the fixed version for your Ubuntu release and the service passes its health check.")
@@ -652,6 +657,16 @@ def others_sentence(g: Group) -> str:
     return f"{lead}{join_names(bits) if not tail else ', '.join(bits)}{tail}."
 
 
+def coverage_ids(g: Group, item: dict) -> set[str]:
+    """IDs explicitly shown in the deterministic fields of this numbered item."""
+    fields = [item["head"], others_sentence(g), item["reference_line"]]
+    fields.extend(label for label, _ in item["references"])
+    fields.extend(row["cve"] for row in item["rows"])
+    visible = {value.casefold() for value in ai_mod.ID_RE.findall("\n".join(fields))}
+    return {value for a in g.advs for value in (a.key, a.ghsa, *a.cves)
+            if value and value.casefold() in visible}
+
+
 def _low_rate(fx: Fetcher) -> bool:
     try:
         return int(getattr(fx, "rate_remaining", None) or 99) < 6
@@ -672,16 +687,22 @@ def save_state(path: Path, state: dict) -> None:
     path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def attach_usn(advs: list[Advisory], fx: Fetcher) -> int:
+def attach_usn(advs: list[Advisory], fx: Fetcher, until: date) -> int:
     usn = ubuntu.usn_map(sorted({c for a in advs for c in a.cves}), fx)
+    end = datetime.combine(until + timedelta(days=1), dtime.min, timezone.utc)
+    matched = set()
     for a in advs:
         for c in a.cves:
             for u in usn.get(c, []):
+                stamp = _dt(u.get("published"))
+                if stamp is None or stamp >= end:
+                    continue
+                matched.add(c)
                 if (u["id"], u["url"]) not in a.usn:
                     a.usn.append((u["id"], u["url"]))
                     a.references.append((u["id"], u["url"]))
                 a.usn_info[u["id"]] = {"published": u.get("published"), "packages": u.get("packages") or {}}
-    return len(usn)
+    return len(matched)
 
 
 def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], posted: dict,
@@ -691,6 +712,10 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
     start_dt = datetime.combine(missed_start, dtime.min, timezone.utc)
     end_dt = datetime.combine(until + timedelta(days=1), dtime.min, timezone.utc)
     since_dt = datetime.combine(since, dtime.min, timezone.utc)
+
+    def before_end(value: str | None) -> bool:
+        stamp = _dt(value)
+        return stamp is not None and stamp < end_dt
 
     # GHSA
     gh: dict[str, tuple[dict, dict]] = {}
@@ -702,7 +727,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
     stats["ghsa_global"] = len(rows)
     for g in rows:
         p = match_ghsa(g, projects)
-        if p and not g["withdrawn"]:
+        if p and not g["withdrawn"] and before_end(g["published"]):
             gh[g["ghsa"]] = (g, p)
     # advisories published long ago that were only reviewed into the GitHub Advisory Database this week
     try:
@@ -713,7 +738,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
     for g in upd:
         rv, pub = _dt(g.get("reviewed")), _dt(g["published"])
         p = match_ghsa(g, projects)
-        if p and not g["withdrawn"] and rv and pub and rv >= since_dt and pub < start_dt:
+        if p and not g["withdrawn"] and rv and pub and since_dt <= rv < end_dt and pub < start_dt:
             gh.setdefault(g["ghsa"], (g, p))
     n_repo = 0
     for p in projects[:]:
@@ -725,7 +750,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
         n_repo += 1
         for g in ghsa.repo_advisories(p["repo"], fx):
             pub = _dt(g["published"])
-            if pub and pub >= start_dt and not g["withdrawn"] and g["severity"] in ("critical", "high", None):
+            if pub and start_dt <= pub < end_dt and not g["withdrawn"] and g["severity"] in ("critical", "high", None):
                 gh.setdefault(g["ghsa"], (g, p))
     stats["ghsa_matched"] = len(gh)
 
@@ -736,6 +761,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
         log.warning("NVD window failed: %s", exc)
         nvd_recs = []
     stats["nvd_window"] = len(nvd_recs)
+    nvd_recs = [r for r in nvd_recs if before_end(r["published"])]
     nvd_by_id = {r["id"]: r for r in nvd_recs}
     nvd_hits = [(r, p) for r in nvd_recs if (p := match_nvd(r, projects))]
     stats["nvd_matched"] = len(nvd_hits)
@@ -750,6 +776,8 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
     except SourceError as exc:
         log.warning("KEV failed: %s", exc)
     stats["kev_catalog"] = len(kev_idx)
+    kev_idx = {cve: entry for cve, entry in kev_idx.items()
+               if entry.get("dateAdded") and entry["dateAdded"] <= until.isoformat()}
     # KEV entries added in the window for a watchlist project become items even when GHSA/NVD matching missed them
     have = {c for a in items for c in a.cves}
     for cve, e in kev_idx.items():
@@ -759,9 +787,10 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
         pj = next((p for p in projects if kev_matches(e, p.get("kev", []))), None)
         if not pj:
             continue
-        n = nvd_by_id.get(cve) or nvd.get_cve(cve, fx) or {
-            "id": cve, "published": f"{d}T00:00:00", "description": e.get("shortDescription", ""), "cvss": None,
-            "severity": None, "references": [], "cpes": []}
+        n = nvd_by_id.get(cve) or nvd.get_cve(cve, fx)
+        if not n or not before_end(n["published"]):
+            n = {"id": cve, "published": f"{d}T00:00:00", "description": e.get("shortDescription", ""),
+                 "cvss": None, "severity": None, "references": [], "cpes": []}
         nvd_by_id[cve] = n
         items.append(advisory_from_nvd(n, pj))
         stats["kev_driven"] = stats.get("kev_driven", 0) + 1
@@ -771,10 +800,11 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
         for c in a.cves:
             if c not in nvd_by_id and len(nvd_by_id) < 400:
                 r = nvd.get_cve(c, fx)
-                if r:
+                if r and before_end(r["published"]):
                     nvd_by_id[c] = r
     all_cves = sorted({c for a in items for c in a.cves})
-    epss_map = epss.lookup(all_cves, fx) if all_cves else {}
+    score_day = until if until < datetime.now(timezone.utc).date() else None
+    epss_map = epss.lookup(all_cves, fx, as_of=score_day) if all_cves else {}
     stats["epss_scores"] = len(epss_map)
     for a in items:
         a_osv = osv.lookup(a.ghsa or a.cves[0], fx) if (a.ghsa or a.cves) else None
@@ -785,7 +815,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
         resolve_fixed(a, fx)
 
     def in_window(a: Advisory) -> bool:  # disclosed in the window, or added to CISA KEV in the window
-        if (a.disclosed or a.published) >= since_dt:
+        if since_dt <= (a.disclosed or a.published) < end_dt:
             return True
         return any(e.get("dateAdded") and since <= date.fromisoformat(e["dateAdded"]) <= until for e in a.kev.values())
 
@@ -796,7 +826,7 @@ def collect(since: date, until: date, *, fx: Fetcher, projects: list[dict], post
     return main, missed, stats
 
 
-# ---- intro, clauses, takeaways ---------------------------------------------------------------
+# ---- intro and clauses ---------------------------------------------------------------
 def clause_for(g: Group, short: str) -> str:
     short = clip_phrase(short, 110)
     if g.ubuntu:
@@ -805,25 +835,25 @@ def clause_for(g: Group, short: str) -> str:
 
 
 def intro_groups(groups: list[Group]) -> tuple[list[Group], list[Group]]:
-    edge = [g for g in groups if g.primary.category == "edge"][:6]
-    fast = [g for g in groups if g not in edge and (g.is_kev or g.max_cvss >= 9.0)][:6]
+    fast = [g for g in groups if g.primary.action() != "Patch this week"][:6]
+    edge = [g for g in groups if g not in fast and g.primary.category == "edge"][:6]
     return edge, fast
 
 
 def build_intro(n_items: int, m_items: int, missed_labels: list[str], edge_clauses: list[str], fast_clauses: list[str]) -> str:
     """N and M count numbered items (not advisories); at most 3 missed projects are named."""
     if n_items == 0:
-        return "No new critical/high security issues matched the watchlist this week."
-    lead = (f"Here’s a roundup of **{n_items} critical/high security {'issue' if n_items == 1 else 'issues'}** "
-            "disclosed this week affecting popular open-source self-hosted projects")
+        return "No advisories met the weekly selection criteria."
+    lead = (f"Here’s a roundup of **{n_items} self-hosted security {'item' if n_items == 1 else 'items'}** "
+            "covering new disclosures and newly listed exploitation")
     if m_items:
         lead += (f", plus **{m_items} earlier {'advisory' if m_items == 1 else 'advisories'} for {join_names(missed_labels[:3])}** "
                  "we hadn’t covered yet (see *Missed Earlier*).")
     else:
         lead += "."
-    edge = f" Start with your edge: {join_list(edge_clauses)}." if edge_clauses else ""
-    fast = f" Then patch fast: {join_list(fast_clauses)}." if fast_clauses else ""
-    return f"{lead}{edge}{fast}"
+    fast = f" Patch first: {join_list(fast_clauses)}." if fast_clauses else ""
+    edge = f" {'Next, check' if fast else 'Start with'} your edge: {join_list(edge_clauses)}." if edge_clauses else ""
+    return f"{lead}{fast}{edge}"
 
 
 # ---- views ------------------------------------------------------------------------------------
@@ -882,15 +912,19 @@ def reference_line(g: Group) -> str:
 
 
 def overflow_items(groups: list[Group]) -> list[dict]:
-    return [{"title": f"{g.label}: {g.primary.title}", "id": g.primary.ghsa or adv_id(g.primary),
-             "severity": severity_line(g.primary), "url": next((url for _, url in advisory_links(g.primary)), "")}
-            for g in groups[:10]]
+    return [{"title": f"{g.label}: {g.primary.title}",
+             "id": " / ".join(dict.fromkeys(filter(None, (g.primary.ghsa, adv_id(g.primary))))),
+             "severity": severity_line(g.primary), "action": g.primary.action(),
+             "url": next((url for _, url in advisory_links(g.primary)), "")}
+            for g in groups[:MAX_OVERFLOW]]
 
 
 def table_rows(g: Group, cap: int = 4) -> list[dict]:
     rows = []
     for a in g.advs:
-        rows += a.rows()
+        rows += sorted(a.rows(), key=lambda row: (
+            row["exploitation"] != "Known exploited (CISA KEV)", ACTION_RANK[row["action"]], row["cve"],
+        ))
     return rows[:cap]
 
 
@@ -952,7 +986,7 @@ def view(g: Group, prose: str, short: str | None = None, missed: bool = False) -
         "affected": combined(g, "affected") or "See the vendor advisory for affected versions.",
         "fixed": (combined(g, "fixed") + (" (and backports)" if a.backports and not g.ubuntu else ""))
                  or ("No fixed release yet, per the advisory." if a.unpatched else "No fixed version listed in the sources. Check the vendor release notes."),
-        "workaround": a.workaround or "None published. Upgrade.",
+        "workaround": a.workaround or "None listed in the advisory.",
         "rows": table_rows(g),
         "steps": steps,
         "references": [("Vendor advisory" if a.repo and label == a.ghsa else label, url) for label, url in refs],
@@ -1026,7 +1060,7 @@ def edit_intro(writer: ai_mod.AIWriter, groups: list[Group], draft: str, lead: s
         if not text.startswith(lead + " "):
             return None
         tail = text[len(lead):].strip()
-        tail = re.sub(r"\b(Start with your edge|Then patch fast):\s*(?:\1:\s*)+", r"\1: ", tail, flags=re.I)
+        tail = re.sub(r"\b(Start with your edge|Next, check your edge|Patch first):\s*(?:\1:\s*)+", r"\1: ", tail, flags=re.I)
         for g in groups:
             name = re.escape(g.label)
             tail = re.sub(rf"(?<!\w)({name})(?:\s*:\s*|\s+)(?:{name})(?!\w)", r"\1", tail, flags=re.I)
@@ -1062,7 +1096,7 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
     left = main_groups[MAX_MAIN:]
     missed = missed_groups[:MAX_MISSED]
     left_missed = missed_groups[MAX_MISSED:]
-    stats["usn_matches"] = attach_usn([a for g in shown + missed for a in g.advs], fx)
+    stats["usn_matches"] = attach_usn([a for g in shown + missed for a in g.advs], fx, until)
     for g in shown + missed:
         g.ubuntu = ubuntu_info(g)
     release_rows = security_releases(projects, since, until, fx)
@@ -1073,8 +1107,12 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
     if writer.active:
         for g in shown + missed:
             edited = writer.prose(
-                "Edit the supplied Technical Details draft for flow. Cut hedging and keep every fact. "
-                "Use two to four plain sentences where the draft supports that. Keep the primary advisory in focus.",
+                "Edit the Technical Details draft for someone running their own service. "
+                "Start with the affected component and what can happen. Then state the required access, exposure, "
+                "configuration or deployment condition only if the source explicitly establishes it. "
+                "Keep qualifiers such as authentication and permissions. Use up to three plain sentences. "
+                "Leave upgrade instructions, deadlines and workarounds to the separate remediation block. "
+                "Omit exploit instructions, example payloads and speculation.",
                 {**facts_for(g), "draft": prose[g.label]}, max_chars=700, allow=allow_for(g.primary),
             )
             if edited:
@@ -1088,20 +1126,38 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
                         [clause_for(g, shorts[g.label]) for g in fast])
     if writer.active and intro != lead:
         intro = edit_intro(writer, shown + missed, intro, lead)
+    items = [view(g, prose[g.label], shorts[g.label]) for g in shown]
+    missed_items = [view(g, prose[g.label], shorts[g.label], missed=True) for g in missed]
+    overflow_groups = (left + left_missed)[:MAX_OVERFLOW]
+    overflow = overflow_items(overflow_groups)
     raw = render_weekly({
         "intro": intro,
-        "items": [view(g, prose[g.label], shorts[g.label]) for g in shown],
-        "missed": [view(g, prose[g.label], shorts[g.label], missed=True) for g in missed],
-        "overflow": overflow_items(left + left_missed), "releases": release_rows, "data_line": DATA_LINE,
+        "items": items, "missed": missed_items,
+        "overflow": overflow, "releases": release_rows, "data_line": DATA_LINE,
     })
     # Keep canonical links intact when shortening commit versions in display text.
     raw = "".join(part if idx % 2 else scrub_pseudo(part) for idx, part in
                   enumerate(re.split(r"(https?://[^\s)]+)", raw)))
     title = f"🚨 Weekly Self-Hosted Security Summary ({fmt_range(since, until)})"
-    listed = [a for g in shown + left + missed + left_missed for a in g.advs]
+    locations = {}
+    for position, (g, item) in enumerate(zip(shown + missed, items + missed_items), 1):
+        section = "main" if position <= len(shown) else "missed earlier"
+        locations.update((id_, f"{section} item {position}") for id_ in coverage_ids(g, item))
+    for position, (g, row) in enumerate(zip(overflow_groups, overflow), 1):
+        ids = set(row["id"].split(" / ")) & {g.primary.key, g.primary.ghsa, *g.primary.cves}
+        locations.update((id_, f"overflow {position}") for id_ in ids)
+    main_ids = {a.key for a in all_main}
+    for a in all_main + all_missed:
+        date_basis = ("earlier disclosure" if a.key not in main_ids
+                      else "disclosed in window" if since <= (a.disclosed or a.published).date() <= until
+                      else "new KEV listing")
+        evidence = "CISA KEV" if a.is_kev else "CVSS >= 7.0" if (a.cvss or 0) >= 7.0 else f"{a.severity} rating"
+        place = locations.get(adv_id(a)) or locations.get(a.key) or "not displayed"
+        line = f"{adv_id(a)} | {a.project} | {evidence} | {date_basis} | {a.action()} | {place}"
+        log.info("Advisory selection: %s", redact(line))
     return {"title": title, "raw": raw, "tags": TAGS,
             "external_id": f"weekly-advisory-{until.isoformat()}", "stats": stats,
-            "ids": [x for a in listed for x in [a.key, *a.cves]], "n_main": n_adv,
+            "ids": sorted(locations), "n_main": n_adv,
             "n_missed": sum(len(g.advs) for g in missed), "ai": writer.stats}
 
 
