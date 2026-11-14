@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+from datetime import datetime, timezone
 
 from .discourse import DiscourseClient
 
@@ -20,7 +21,9 @@ def make_excerpt(*parts: str, limit: int = 280) -> str:
 
 
 def publish(client: DiscourseClient, *, title: str, raw: str, tags: list[str], external_id: str,
-            excerpt: str | None = None) -> dict:
+            excerpt: str | None = None, category: int | None = None) -> dict:
+    if category is not None:
+        return publish_weekly(client, title, raw, tags, external_id, category)
     topic = client.get_topic_by_external_id(external_id)
     if topic:
         topic_id = topic["id"]
@@ -38,3 +41,41 @@ def publish(client: DiscourseClient, *, title: str, raw: str, tags: list[str], e
     if not isinstance(res, dict) or res.get("status") != "live":
         raise RuntimeError(f"topic {topic_id} not live after publish: {str(res)[:200]}")
     return {"topic_id": topic_id, "public_path": res["public_path"]}
+
+
+def publish_weekly(client: DiscourseClient, title: str, raw: str, tags: list[str], external_id: str,
+                   category: int) -> dict:
+    from .preflight import WEEKLY_CATEGORY, continuation_marker, in_window, publish_time, split_post
+
+    if category != WEEKLY_CATEGORY:
+        raise ValueError(f"Weekly advisories require Discourse category {WEEKLY_CATEGORY}")
+    head, tail = split_post(raw, external_id)
+    topic = client.get_topic_by_external_id(external_id)
+    continuation = None
+    if topic:
+        topic_id = topic["id"]
+        reply = client.get_post_number(topic_id, 2)
+        if reply and reply.get("username") == client.username and reply.get("raw", "").partition("\n")[0] == (
+                continuation_marker(external_id).rstrip()):
+            continuation = reply
+            head, tail = split_post(raw, external_id, keep_reply=True)
+        elif tail and (reply or topic.get("highest_post_number", 1) > 1):
+            raise ValueError("The first reply slot is occupied by another post")
+        if not (created := publish_time(topic)) or not in_window(created):
+            raise ValueError("Existing topic creation was outside the publish window")
+    if not in_window(datetime.now(timezone.utc)):
+        raise ValueError("Weekly writes require the 14:00–16:00 UTC publish window")
+    if topic:
+        first = next(p for p in topic["post_stream"]["posts"] if p["post_number"] == 1)
+        client.edit_first_post(first["id"], head, topic_id=topic_id, title=title, category=category, tags=tags)
+    else:
+        topic_id = client.create_topic(title=title, raw=head, category=category, external_id=external_id,
+                                       tags=tags)["topic_id"]
+    if tail:
+        if continuation:
+            client.edit_first_post(continuation["id"], tail)
+        else:
+            reply = client.create_post(topic_id, tail)
+            if reply.get("post_number") != 2:
+                raise ValueError("Discourse did not place the continuation in the first reply slot")
+    return {"topic_id": topic_id, "public_path": f"/t/-/{topic_id}"}

@@ -15,6 +15,8 @@ from typing import Any
 
 import httpx
 
+from .credentials import redact, require_https, same_origin
+
 log = logging.getLogger(__name__)
 
 # Discourse: Topic::EXTERNAL_ID_MAX_LENGTH = 50, format /\A[\w-]+\z/, unique case-insensitive.
@@ -23,7 +25,7 @@ EXTERNAL_ID_MAX_LENGTH = 50
 
 class DiscourseError(RuntimeError):
     def __init__(self, status: int, method: str, path: str, body: str = ""):
-        super().__init__(f"{method} {path} -> HTTP {status}: {body[:300]}")
+        super().__init__(redact(f"{method} {path} -> HTTP {status}: {body[:300]}"))
         self.status = status
 
 
@@ -44,6 +46,13 @@ class DiscourseClient:
         user = username or os.environ.get("DISCOURSE_API_USERNAME") or "system"
         if not self.base_url or not key:
             raise ValueError("DISCOURSE_URL and DISCOURSE_API_KEY are required")
+        try:
+            base = httpx.URL(self.base_url)
+            require_https(base)
+            if base.query or base.fragment:
+                raise ValueError()
+        except (ValueError, httpx.InvalidURL):
+            raise ValueError("DISCOURSE_URL must be an HTTPS URL without credentials, query, or fragment") from None
         self.username = user
         self.max_retries = max_retries
         self._sleep = sleep
@@ -52,6 +61,8 @@ class DiscourseClient:
             headers={"Api-Key": key, "Api-Username": user, "Accept": "application/json"},
             transport=transport,
             timeout=timeout,
+            trust_env=False,
+            follow_redirects=False,
         )
 
     def __repr__(self) -> str:  # never expose the key
@@ -62,18 +73,34 @@ class DiscourseClient:
 
     # -- low level ---------------------------------------------------------
     def request(self, method: str, path: str, *, allow_404: bool = False, **kw: Any) -> Any:
+        follow = kw.pop("follow_redirects", False)
+        url = self._http.base_url.join(path)
+        if not same_origin(self._http.base_url, url):
+            raise ValueError("Unexpected Discourse request origin")
         for attempt in range(self.max_retries + 1):
-            resp = self._http.request(method, path, **kw)
+            try:
+                resp = self._http.request(method, url, **kw)
+                for _ in range(5):
+                    if not (follow and method == "GET" and resp.has_redirect_location):
+                        break
+                    target = resp.url.join(resp.headers["Location"])
+                    if not same_origin(self._http.base_url, target):
+                        break
+                    resp = self._http.get(target)
+            except httpx.HTTPError as exc:
+                raise DiscourseError(0, method, path, type(exc).__name__) from None
             if resp.status_code == 429 and attempt < self.max_retries:
                 wait = _retry_after(resp)
-                log.warning("429 on %s %s, sleeping %.1fs", method, path, wait)
+                log.warning("429 on %s %s, sleeping %.1fs", method, redact(path, self._http.headers["Api-Key"]), wait)
                 self._sleep(wait)
                 continue
             break
         if resp.status_code == 404 and allow_404:
             return None
+        if resp.is_redirect:
+            raise DiscourseError(resp.status_code, method, path, "unexpected redirect")
         if resp.status_code >= 400:
-            raise DiscourseError(resp.status_code, method, path, resp.text)
+            raise DiscourseError(resp.status_code, method, path, redact(resp.text, self._http.headers["Api-Key"]))
         if not resp.content:
             return {}
         try:
@@ -90,6 +117,12 @@ class DiscourseClient:
 
     def get_post(self, post_id: int) -> dict:
         return self.request("GET", f"/posts/{post_id}.json")
+
+    def get_topic(self, topic_id: int) -> dict:
+        return self.request("GET", f"/t/-/{topic_id}.json")
+
+    def get_post_number(self, topic_id: int, post_number: int) -> dict | None:
+        return self.request("GET", f"/posts/by_number/{topic_id}/{post_number}.json", allow_404=True)
 
     def create_topic(
         self,
@@ -117,13 +150,19 @@ class DiscourseClient:
         topic_id: int | None = None,
         title: str | None = None,
         edit_reason: str | None = None,
+        category: int | None = None,
+        tags: list[str] | None = None,
     ) -> dict:
         data = {"post[raw]": raw}
         if edit_reason:
             data["post[edit_reason]"] = edit_reason
         result = self.request("PUT", f"/posts/{post_id}.json", data=data)
         if title is not None and topic_id is not None:
-            self.request("PUT", f"/t/-/{topic_id}.json", data={"title": title})
+            if tags is None and category is None:
+                self.request("PUT", f"/t/-/{topic_id}.json", data={"title": title})
+            else:
+                self.request("PUT", f"/t/-/{topic_id}.json",
+                             json={"title": title, "category_id": category, "tags": [{"name": tag} for tag in tags or []]})
         return result
 
     def change_timestamp(self, topic_id: int, timestamp: int | float) -> dict:

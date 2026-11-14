@@ -1,0 +1,6 @@
+# Publisher or site names to reject in the rendered advisory, case-insensitively.
+# Uncomment an entry to enable it.
+sources: [
+  # "Example News",
+  # "Example Security Blog",
+]

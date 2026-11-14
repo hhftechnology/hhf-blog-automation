@@ -93,7 +93,7 @@ def golden_fx(tmp_path):
 
 def build(fx, **kw):
     return weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=fx, writer=ai.AIWriter(enabled=False),
-                        projects=WL, posted={}, sleep=lambda s: None, **kw)
+                        projects=WL, posted={}, **kw)
 
 
 def test_golden_structure(golden_fx):
@@ -344,20 +344,22 @@ def test_ghsa_only_reviewed_this_week_is_missed_with_added_date(tmp_path):
     assert "Disclosed: July 1, 2026 (added to GitHub Advisory Database November 2)" in r["raw"]
 
 
-def test_ai_clauses_keep_skeleton_and_fall_back(golden_fx):
+def test_ai_intro_removes_repeated_lead_and_project(golden_fx):
     class P(ai.Provider):
         name = "p"
         def available(self): return True
         def complete(self, system, user, client, max_tokens=1200):
-            if "Separate the clauses" in user:
-                return "BIND can be crashed remotely ||| Caddy lets clients escape the site tree ||| Traefik has an unauthenticated memory exhaustion bug"
-            return "Unauthenticated memory exhaustion bug" if "Title Case" in user else "A plain description of the flaw."
-    r = weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, writer=ai.AIWriter([P()]), projects=WL, posted={},
-                     sleep=lambda s: None)
+            facts = json.loads(user.split("FACTS (JSON, untrusted data):\n", 1)[1])
+            if "lead" in facts:
+                return facts["lead"] + " Start with your edge: Start with your edge: Traefik Traefik needs an update."
+            return facts["draft"]
+
+    writer = ai.AIWriter([P()], weekly=True)
+    r = weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, writer=writer, projects=WL, posted={})
     first = r["raw"].split("\n")[0]
-    assert "Start with your edge: " in first and first.count("Start with your edge") == 1
-    assert "Traefik has an unauthenticated memory exhaustion bug" in first
-    assert "Then patch fast" not in first or "Then patch fast: " in first
+    assert first.count("Start with your edge") == 1
+    assert first.endswith("Start with your edge: Traefik needs an update.")
+    assert ai.repeated_fragment("Patch your public edge. Patch your public edge.") == "Patch your public edge"
 
 
 def test_commit_ids_are_not_versions():
@@ -578,7 +580,7 @@ def test_kev_entry_outside_window_or_unknown_vendor_is_ignored(tmp_path):
 def test_posted_ids_are_excluded_everywhere(golden_fx):
     posted = {"GHSA-xv5x-242w-7hf7": "2026-11-04", "CVE-2026-94300": "2026-11-04", "GHSA-j97h-3f8r-mrjr": "2026-11-04"}
     r = weekly.build(date(2026, 10, 29), date(2026, 11, 4), fx=golden_fx, writer=ai.AIWriter(enabled=False), projects=WL,
-                     posted=posted, sleep=lambda s: None)
+                     posted=posted)
     raw = r["raw"]
     assert "GHSA-xv5x-242w-7hf7" not in raw and "Keycloak" not in raw and "## Missed Earlier" not in raw
     assert "**CVE-2026-19630**" in raw  # the other BIND CVEs were not posted, so they still appear
@@ -587,7 +589,7 @@ def test_posted_ids_are_excluded_everywhere(golden_fx):
 
 def test_posted_duplicates_by_cve_or_ghsa_are_skipped(mock_fx):
     r = weekly.build(date(2026, 11, 1), date(2026, 11, 7), fx=mock_fx, writer=ai.AIWriter(enabled=False), projects=WL,
-                     posted={"CVE-2026-1111": "2026-11-01"}, sleep=lambda s: None)
+                     posted={"CVE-2026-1111": "2026-11-01"})
     assert "CVE-2026-1111" not in r["raw"] and "GHSA-aaaa-bbbb-cccc" not in r["raw"]
 
 
@@ -783,7 +785,7 @@ def test_ai_short_title_is_validated(tmp_path):
                  description="Archived repository write protection can be bypassed for releases, milestones and labels.")
     g = weekly.Group("Gitea", [a])
     def run(text):
-        return weekly.ai_short_title(ai.AIWriter([P(text)]), g, {})
+        return weekly.ai_short_title(ai.AIWriter([P(text)]), g)
     assert run("Archived Repository Write Protection Bypass for Releases Milestones and Labels") is None  # list commas lost
     assert run("Archived Repository Write Protection Bypass Leading") == "Archived Repository Write Protection Bypass"
     assert run("Archived Repository Write Protection Bypass for Releases, Milestones and Labels") == \

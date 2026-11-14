@@ -5,12 +5,12 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
 import re
 import sys
-import time
 from dataclasses import dataclass, field
 from datetime import date, datetime, time as dtime, timedelta, timezone
 from pathlib import Path
@@ -19,7 +19,7 @@ from urllib.parse import quote, urlsplit
 import yaml
 
 from . import ai as ai_mod
-from .publish import make_excerpt
+from .credentials import redact
 from .facts import Advisory, fmt_date, fmt_range, has_public_poc, kev_matches, md_text, severity_from_cvss
 from .sources import epss, ghsa, kev, nvd, osv, releases, ubuntu
 from .sources.base import Fetcher, SourceError, default_fetcher
@@ -828,11 +828,11 @@ def build_intro(n_items: int, m_items: int, missed_labels: list[str], edge_claus
 
 # ---- views ------------------------------------------------------------------------------------
 def link_url(url: str | None) -> str:
-    if not url or re.search(r'[\s<>\[\]"\\]', url):
+    if not isinstance(url, str) or not url or re.search(r'[\s<>\[\]"\\\x00-\x1f\x7f]', url):
         return ""
     try:
         u = urlsplit(url)
-        if u.scheme in ("http", "https") and u.hostname and not u.username and not u.password:
+        if u.scheme in ("http", "https") and u.hostname and "@" not in u.netloc:
             return url.replace("(", "%28").replace(")", "%29")
     except ValueError:
         pass
@@ -871,7 +871,7 @@ def reference_links(g: Group) -> tuple[list[tuple[str, str]], bool]:
 
 def reference_line(g: Group) -> str:
     links, more = reference_links(g)
-    parts = [f"[{lab}]({url})" for lab, url in links]
+    parts = [f"[{md_text(lab)}]({url})" for lab, url in links]
     if more:
         seen = set()
         for a in g.advs:  # one "All ..." link per merged project (Incus & LXD)
@@ -995,54 +995,56 @@ def security_releases(projects: list[dict], since: date, until: date, fx: Fetche
 
 
 # ---- AI helpers (all output passes the fact guard; deterministic fallbacks otherwise) ---------------------
-def ai_short_title(writer: ai_mod.AIWriter, g: Group, dates: dict) -> str | None:
+def ai_short_title(writer: ai_mod.AIWriter, g: Group) -> str | None:
     a = g.primary
-    t = writer.prose(
-        "Write a short Title Case summary of the flaw for a post heading: at most 70 characters, no trailing period, "
-        "do not start with the project name, keep acronyms and code as written (NTLM, RCE, `{host}`).",
-        facts_for(g), max_chars=90, allow={"advisory": allow_for(a), "dates": dates})
-    if not t:
-        return None
-    t = t.strip().rstrip(".")
     src = (a.title + " " + a.description).lower()
-    if not any(w in src for w in re.findall(r"[a-z]{4,}", t.lower())):
-        return None  # shares no word with the advisory: not trustworthy
-    ai = trim_dangling(title_case(strip_project(t, g.names()) or t))
     det = short_title(a.title, g.names())
-    if len(ai.split()) < 2 or len(ai) > 80 or _LEADING_TO.search(ai) and len(ai) > 70:
-        return None
-    if (", " in det and ", " not in ai and len(ai.split()) >= len(det.split()) - 1
-            and len(set(ai.lower().split()) & set(det.lower().split())) >= 0.8 * len(ai.split())):
-        return None  # same title minus the list commas: keep the deterministic one
-    return ai
+
+    def validate(text):
+        t = text.rstrip(".")
+        if not any(w in src for w in re.findall(r"[a-z]{4,}", t.lower())):
+            return None
+        title = trim_dangling(title_case(strip_project(t, g.names()) or t))
+        if len(title.split()) < 2 or len(title) > 80 or _LEADING_TO.search(title) and len(title) > 70:
+            return None
+        if (", " in det and ", " not in title and len(title.split()) >= len(det.split()) - 1
+                and len(set(title.lower().split()) & set(det.lower().split())) >= 0.8 * len(title.split())):
+            return None
+        return title
+
+    return writer.prose(
+        "Edit the draft into a clear Title Case phrase of at most 70 characters, no trailing period. "
+        "Omit the project prefix and keep acronyms, list commas and code spans intact.",
+        {**facts_for(g), "draft": det}, max_chars=90, allow=allow_for(a), title=True, validate=validate,
+    )
 
 
-def ai_clauses(writer: ai_mod.AIWriter, groups: list[Group], shorts: dict[str, str], dates: dict) -> dict[str, str]:
-    if not groups:
-        return {}
-    facts = [{"project": g.label, "title": shorts[g.label], "severity": severity_line(g.primary)} for g in groups]
-    t = writer.prose(
-        "For each item, in order, write ONE short concrete clause of at most 14 words that starts with the project name and "
-        "says what is wrong, like 'Traefik has an unauthenticated memory/FD exhaustion bug'. Separate the clauses with ' ||| '. "
-        "No numbering, no trailing period.", {"items": facts}, max_chars=170 * len(groups),
-        allow={"advisories": [allow_for(g.primary) for g in groups], "dates": dates})
-    if not t:
-        return {}
-    parts = [x.strip().rstrip(".") for x in t.split("|||")]
-    if len(parts) != len(groups):
-        return {}
-    out = {}
-    for g, c in zip(groups, parts):
-        if c and c.lower().startswith(g.label.lower()[:4]) and len(c) <= 170:
-            out[g.label] = c
-    return out
+def edit_intro(writer: ai_mod.AIWriter, groups: list[Group], draft: str, lead: str) -> str:
+    items = [{"project": g.label, "title": g.primary.title, "severity": severity_line(g.primary)} for g in groups]
+
+    def validate(text):
+        if not text.startswith(lead + " "):
+            return None
+        tail = text[len(lead):].strip()
+        tail = re.sub(r"\b(Start with your edge|Then patch fast):\s*(?:\1:\s*)+", r"\1: ", tail, flags=re.I)
+        for g in groups:
+            name = re.escape(g.label)
+            tail = re.sub(rf"(?<!\w)({name})(?:\s*:\s*|\s+)(?:{name})(?!\w)", r"\1", tail, flags=re.I)
+        return f"{lead} {tail}" if not ai_mod.repeated_fragment(tail) else None
+
+    return writer.prose(
+        "Edit this whole opening paragraph for flow and clarity. Copy the lead verbatim and preserve the order "
+        "of the draft. Use the ordered item list for context. Keep each lead-in and project name from repeating.",
+        {"draft": draft, "lead": lead, "items": items},
+        max_chars=max(len(draft) + 120, 350), validate=validate,
+    ) or draft
 
 
 def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, projects: list[dict],
-          posted: dict, sleep=time.sleep) -> dict:
+          posted: dict, max_repos: int = 60) -> dict:
     from .render import render_weekly
 
-    all_main, all_missed, stats = collect(since, until, fx=fx, projects=projects, posted=posted)
+    all_main, all_missed, stats = collect(since, until, fx=fx, projects=projects, posted=posted, max_repos=max_repos)
     main_groups = group_advisories(all_main)
     n_adv = sum(len(g.advs) for g in main_groups)
     if not main_groups:  # nothing new this week: deliver nothing
@@ -1067,109 +1069,131 @@ def build(since: date, until: date, *, fx: Fetcher, writer: ai_mod.AIWriter, pro
     stats["main"], stats["missed"] = len(shown), len(missed)
 
     prose = {g.label: det_prose(g.primary) for g in shown + missed}
-    shorts = {g.label: short_title(g.primary.title, g.names()) for g in shown + missed + left + left_missed}
-    clauses: dict[str, str] = {}
-
-    def render_all() -> str:
-        edge_g, fast_g = intro_groups(shown)
-        intro = build_intro(
-            len(shown), len(missed), [g.label for g in missed],
-            [clauses.get(g.label) or clause_for(g, shorts[g.label]) for g in edge_g],
-            [clauses.get(g.label) or clause_for(g, shorts[g.label]) for g in fast_g])
-        meta["intro"] = intro
-        ctx = {
-            "intro": intro,
-            "items": [view(g, prose[g.label], shorts[g.label]) for g in shown],
-            "missed": [view(g, prose[g.label], shorts[g.label], missed=True) for g in missed],
-            "overflow": overflow_items(left + left_missed), "releases": release_rows, "data_line": DATA_LINE,
-        }
-        return scrub_pseudo(render_weekly(ctx))
-
-    meta: dict = {}
-
-    def fit() -> str:
-        raw = render_all()
-        while len(raw) > MAX_CHARS and (missed or shown):
-            if missed:
-                left_missed.insert(0, missed.pop())
-            else:
-                left.insert(0, shown.pop())  # demoted to the "Also this week" bullet
-            stats["trimmed_for_size"] = stats.get("trimmed_for_size", 0) + 1
-            raw = render_all()
-        return raw
-
-    raw = fit()  # first pass sizes the post with deterministic text
-    dates = {"since": since.isoformat(), "until": until.isoformat(), "year": until.year, "month": until.month,
-             "day": until.day, "since_year": since.year, "since_month": since.month, "since_day": since.day,
-             "window_days": (until - since).days + 1}
+    shorts = {g.label: short_title(g.primary.title, g.names()) for g in shown + missed}
     if writer.active:
         for g in shown + missed:
-            t = writer.prose(
-                "Write the 'Technical Details' paragraph for the primary advisory of this item: 2 to 3 plain sentences saying "
-                "what the flaw is, what an attacker can do and who is affected. Do not list the other advisories.",
-                facts_for(g), max_chars=700, allow={"advisory": allow_for(g.primary), "dates": dates})
-            sleep(4)  # stay under free-tier per-minute limits
-            if t:
-                prose[g.label] = t
-            st = ai_short_title(writer, g, dates)
-            sleep(4)
-            if st:
+            edited = writer.prose(
+                "Edit the supplied Technical Details draft for flow. Cut hedging and keep every fact. "
+                "Use two to four plain sentences where the draft supports that. Keep the primary advisory in focus.",
+                {**facts_for(g), "draft": prose[g.label]}, max_chars=700, allow=allow_for(g.primary),
+            )
+            if edited:
+                prose[g.label] = edited
+            if st := ai_short_title(writer, g):
                 shorts[g.label] = st
-        edge_g, fast_g = intro_groups(shown)
-        clauses.update(ai_clauses(writer, edge_g + [g for g in fast_g if g not in edge_g], shorts, dates))
-        sleep(4)
-        raw = fit()
-    stats["main"], stats["missed"] = len(shown), len(missed)
+    edge, fast = intro_groups(shown)
+    intro_args = (len(shown), len(missed), [g.label for g in missed])
+    lead = build_intro(*intro_args, [], [])
+    intro = build_intro(*intro_args, [clause_for(g, shorts[g.label]) for g in edge],
+                        [clause_for(g, shorts[g.label]) for g in fast])
+    if writer.active and intro != lead:
+        intro = edit_intro(writer, shown + missed, intro, lead)
+    raw = render_weekly({
+        "intro": intro,
+        "items": [view(g, prose[g.label], shorts[g.label]) for g in shown],
+        "missed": [view(g, prose[g.label], shorts[g.label], missed=True) for g in missed],
+        "overflow": overflow_items(left + left_missed), "releases": release_rows, "data_line": DATA_LINE,
+    })
+    # Keep canonical links intact when shortening commit versions in display text.
+    raw = "".join(part if idx % 2 else scrub_pseudo(part) for idx, part in
+                  enumerate(re.split(r"(https?://[^\s)]+)", raw)))
     title = f"🚨 Weekly Self-Hosted Security Summary ({fmt_range(since, until)})"
     listed = [a for g in shown + left + missed + left_missed for a in g.advs]
-    return {"title": title, "raw": raw, "tags": TAGS, "excerpt": make_excerpt(meta.get("intro", "")),
+    return {"title": title, "raw": raw, "tags": TAGS,
             "external_id": f"weekly-advisory-{until.isoformat()}", "stats": stats,
             "ids": [x for a in listed for x in [a.key, *a.cves]], "n_main": n_adv,
             "n_missed": sum(len(g.advs) for g in missed), "ai": writer.stats}
 
 
 def main(argv: list[str] | None = None) -> int:
+    from . import preflight
+
     ap = argparse.ArgumentParser(description="Weekly self-hosted security advisory")
     ap.add_argument("--since", type=date.fromisoformat, help="window start (default: 6 days before --until, a 7-day window)")
     ap.add_argument("--until", type=date.fromisoformat, default=datetime.now(timezone.utc).date())
     ap.add_argument("--dry-run", action="store_true", help="write out/weekly_advisory-<date>.md, no writes")
+    ap.add_argument("--publish-artifact", action="store_true", help="publish the previously built artifact for --until")
+    ap.add_argument("--save-publication-state", action="store_true", help="save the IDs used to publish the dry-run artifact")
     ap.add_argument("--no-ai", action="store_true")
     ap.add_argument("--ignore-posted", action="store_true", help="do not exclude ids already in the posted state (also HHF_IGNORE_POSTED=1)")
     ap.add_argument("--out-dir", type=Path, default=ROOT / "out")
     ap.add_argument("--state", type=Path, default=ROOT / "state" / "posted.json")
     ap.add_argument("--max-repos", type=int, default=60, help="cap on per-repo GitHub calls")
     args = ap.parse_args(argv)
+    if (args.publish_artifact and args.dry_run) or (args.save_publication_state and not args.dry_run):
+        ap.error("Use --save-publication-state with --dry-run and --publish-artifact on its own")
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
-    logging.getLogger("httpx").setLevel(logging.WARNING)  # request URLs stay out of the logs
+    for logger in ("httpx", "httpcore"):
+        logging.getLogger(logger).setLevel(logging.WARNING)
     since = args.since or args.until - timedelta(days=6)
+    out = args.out_dir / f"weekly_advisory-{args.until.isoformat()}.md"
+    ids_path = out.with_suffix(".json")
+    ext = f"weekly-advisory-{args.until.isoformat()}"
 
     state = load_state(args.state)
-    res = build(since, args.until, fx=default_fetcher(), writer=ai_mod.AIWriter(enabled=not args.no_ai),
-                projects=load_watchlist(),
-                posted={} if (args.ignore_posted or os.environ.get("HHF_IGNORE_POSTED")) else
-                {k: v for k, v in state.get("posted", {}).items() if v < args.until.isoformat()})  # same-day rerun keeps today's items
-    if res.get("empty"):
-        print(json.dumps({"stats": res["stats"]}, indent=2))
-        print("nothing new this week: nothing delivered, state unchanged")
-        return 0
-    print(json.dumps({"title": res["title"], "stats": res["stats"], "ai": res["ai"]}, indent=2))
+    if args.publish_artifact:
+        try:
+            artifact_title, raw = preflight.read_artifact(out, TAGS, args.until)
+            data = json.loads(ids_path.read_text(encoding="utf-8"))
+            if not artifact_title or data["since"] != since.isoformat() or data["sha256"] != artifact_hash(out):
+                raise ValueError("Artifact changed after it was built")
+            res = {"title": artifact_title, "raw": raw, "tags": TAGS, "external_id": ext, "ids": data["ids"]}
+        except (ValueError, KeyError, TypeError, OSError) as exc:
+            print(redact(f"Weekly artifact: {exc}"), file=sys.stderr)
+            return 1
+    else:
+        if args.save_publication_state:
+            ids_path.unlink(missing_ok=True)
+            out.unlink(missing_ok=True)
+        writer = ai_mod.AIWriter(enabled=not args.no_ai, weekly=True)
+        writer.cache_dir = Path(".cache") / "ai" / ext
+        res = build(since, args.until, fx=default_fetcher(), writer=writer, max_repos=args.max_repos,
+                    projects=load_watchlist(),
+                    posted={} if (args.ignore_posted or os.environ.get("HHF_IGNORE_POSTED")) else
+                    {k: v for k, v in state.get("posted", {}).items() if v < args.until.isoformat()})
+        log.info("Cloudflare neurons used: %.2f", writer.neurons)
+        if res.get("empty"):
+            print(json.dumps({"stats": res["stats"]}, indent=2))
+            print("nothing new this week: nothing delivered, state unchanged")
+            return 0
+        print(redact(json.dumps({"title": res["title"], "stats": res["stats"], "ai": res["ai"]}, indent=2)))
+    if preflight.check(res["raw"], res["title"], res["tags"], since, args.until):
+        return 1
     if args.dry_run:
         args.out_dir.mkdir(parents=True, exist_ok=True)
-        out = args.out_dir / f"weekly_advisory-{args.until.isoformat()}.md"
         out.write_text(f"<!-- tags: {', '.join(res['tags'])} | external_id: {res['external_id']} -->\n\n"
                        f"# {res['title']}\n\n{res['raw']}", encoding="utf-8")
+        if args.save_publication_state:
+            ids_path.write_text(json.dumps({"since": since.isoformat(), "sha256": artifact_hash(out),
+                                           "ids": res["ids"]}), encoding="utf-8")
         print(f"dry-run: wrote {out}")
         return 0
-    from .discourse import DiscourseClient
+    from .discourse import DiscourseClient, DiscourseError
     from .publish import publish
 
-    print(json.dumps(publish(DiscourseClient(), title=res["title"], raw=res["raw"], tags=res["tags"],
-                             external_id=res["external_id"],
-                             excerpt=res["excerpt"])))
+    try:
+        client = DiscourseClient()
+        try:
+            publication = publish(client, title=res["title"], raw=res["raw"], tags=res["tags"],
+                                  external_id=res["external_id"], category=preflight.category_id())
+            topic, live_raw, reply_len = preflight.readback(client, publication["topic_id"], ext)
+        finally:
+            client.close()
+    except (DiscourseError, ValueError, KeyError, TypeError, AttributeError) as exc:
+        print(redact(f"Weekly publish failed: {exc}"), file=sys.stderr)
+        return 1
+    if preflight.check(live_raw, res["title"], res["tags"], since, args.until, topic=topic,
+                       expected_raw=res["raw"], reply_length=reply_len):
+        return 1
+    print(json.dumps(publication))
     for k in res["ids"]:
         state.setdefault("posted", {})[k] = args.until.isoformat()
     save_state(args.state, state)
     return 0
+
+
+def artifact_hash(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 if __name__ == "__main__":

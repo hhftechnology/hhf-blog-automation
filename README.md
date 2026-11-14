@@ -54,10 +54,15 @@ Variables / environment:
 |---|---|---|
 | `BLOG_URL` | `https://forum.hhf.technology/blog` | public blog URL, used for API links |
 | `PAGES_URL` | `https://hhftechnology.github.io/hhf-blog-automation` | GitHub Pages URL, used in the feed and index |
-| `BLOG_DRAFTS_CATEGORY_ID` | `113` | category new articles are created in |
-| `AI_PROVIDERS` | `gemini` | AI provider list |
+| `BLOG_DRAFTS_CATEGORY_ID` | `113` | daily blog drafts category |
+| `WEEKLY_CATEGORY_ID` | `86` | weekly category, validated by pre-flight |
+| `AI_PROVIDERS` | weekly `cloudflare,gemini`, daily `gemini` | editor provider order |
+| `CF_AI_MODEL` | `@cf/openai/gpt-oss-120b` | weekly prose model; short titles use Granite Micro |
+| `CF_AI_NEURON_BUDGET` | `6000` | per-run Cloudflare budget checked before each call |
 
-Workflows: `daily.yml` (05:30 UTC), `weekly.yml` (Wednesdays 06:00 UTC), `pages.yml` (tests, builds and deploys the API). Manual runs default to a dry run that uploads `out/` as an artifact.
+For Workers AI, set `CLOUDFLARE_ACCOUNT_ID` and an account-scoped `CLOUDFLARE_API_TOKEN` with Workers AI Read in GitHub Actions secrets. The editor falls back to Gemini if Cloudflare is unavailable. It falls back to deterministic prose when providers fail or the budget is reached. Successful and deterministic choices are reused from `.cache/ai/` for identical inputs. See the [Workers AI REST API](https://developers.cloudflare.com/api/resources/ai/methods/run/) and [pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/).
+
+Workflows: `daily.yml` (05:30 UTC), `weekly.yml` (Wednesdays 14:30 UTC), `pages.yml` (tests, builds and deploys the API). Manual runs default to a dry run that uploads `out/` as an artifact. Weekly pre-flight runs before any publication and checks Discourse readback before recording posted IDs. Enable deny-list entries in `config/forbidden_sources.yml`.
 
 ## Run locally
 
@@ -67,6 +72,9 @@ pip install -e ".[dev]"
 pytest -q
 python -m hhf.daily --dry-run --no-ai     # writes out/daily_briefing-<date>.md
 python -m hhf.weekly --dry-run --no-ai    # writes out/weekly_advisory-<date>.md
+python -m hhf.preflight --raw out/weekly_advisory-2026-11-07.md \
+  --title '🚨 Weekly Self-Hosted Security Summary (October 31 – November 7, 2026)' \
+  --tags security,cve,weekly-security,self-hosted --since 2026-10-31 --until 2026-11-07
 python -m hhf.api --out _site             # builds the API from data/
 ```
 

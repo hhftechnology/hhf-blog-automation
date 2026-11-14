@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
-from hhf import ai, daily, discourse, publish, store, weekly
+from hhf import ai, daily, discourse, preflight, publish, store, weekly
 from hhf.facts import Advisory
 
 WL = weekly.load_watchlist()
@@ -11,7 +11,7 @@ WL = weekly.load_watchlist()
 
 def build_weekly(mock_fx, posted=None, writer=None):
     return weekly.build(date(2026, 11, 1), date(2026, 11, 7), fx=mock_fx, writer=writer or ai.AIWriter(enabled=False),
-                        projects=WL, posted=posted or {}, sleep=lambda s: None)
+                        projects=WL, posted=posted or {})
 
 
 def test_watchlist_covers_required_projects():
@@ -74,15 +74,27 @@ def test_weekly_cli_dry_run_writes_file_only(mock_fx, monkeypatch, tmp_path):
     assert rc == 0 and (tmp_path / "weekly_advisory-2026-11-07.md").exists() and not state.exists()
 
 
-def test_weekly_cli_delivers_and_records_state(mock_fx, monkeypatch, tmp_path):
+@pytest.mark.parametrize("category", [86, 113])
+def test_weekly_cli_delivers_and_records_state(mock_fx, monkeypatch, tmp_path, category):
+    from types import SimpleNamespace
+
     monkeypatch.setattr(weekly, "default_fetcher", lambda: mock_fx)
     sent = []
-    monkeypatch.setattr(discourse, "DiscourseClient", lambda: object())
+    monkeypatch.setattr(discourse, "DiscourseClient", lambda: SimpleNamespace(close=lambda: None))
     monkeypatch.setattr(publish, "publish", lambda c, **kw: sent.append(kw) or {"topic_id": 1, "public_path": "/blog/w"})
+    monkeypatch.setattr(preflight, "readback", lambda *args: (
+        {"title": sent[0]["title"], "tags": [{"name": tag} for tag in weekly.TAGS], "category_id": category,
+         "created_at": "2026-11-07T14:30:00Z"}, sent[0]["raw"], None))
     state = tmp_path / "posted.json"
-    weekly.main(["--since", "2026-11-01", "--until", "2026-11-07", "--no-ai", "--state", str(state)])
+    args = ["--since", "2026-11-01", "--until", "2026-11-07", "--no-ai", "--state", str(state), "--out-dir", str(tmp_path)]
+    assert weekly.main([*args, "--dry-run", "--save-publication-state"]) == 0
+    monkeypatch.setattr(weekly, "default_fetcher", lambda: pytest.fail("publication must reuse the artifact"))
+    assert weekly.main([*args, "--publish-artifact"]) == (0 if category == 86 else 1)
     assert sent[0]["external_id"] == "weekly-advisory-2026-11-07" and sent[0]["tags"][0] == "security"
-    assert "GHSA-aaaa-bbbb-cccc" in json.loads(state.read_text())["posted"]
+    if category == 86:
+        assert "GHSA-aaaa-bbbb-cccc" in json.loads(state.read_text())["posted"]
+    else:
+        assert not state.exists()
 
 
 def test_weekly_uses_ai_prose_only_when_it_passes_the_guard(mock_fx):
