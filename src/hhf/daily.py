@@ -9,6 +9,7 @@ import json
 import logging
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -21,7 +22,8 @@ from . import publish as publish_mod
 from . import store
 from .facts import SEVERITY_ORDER, action_for, fmt_cvss, fmt_epss, has_public_poc, severity_from_cvss
 from .daily_content import (
-    CVE_RE, SENTENCE, SOURCE_NOTES, content_lint, item_view, normalized, number_tokens, previous_details, reference_url,
+    CVE_RE, SENTENCE, SOURCE_NOTES, advisory_details, content_lint, item_view, normalized, number_tokens,
+    previous_details, reference_url,
 )
 from .credentials import redact
 from .sources import abusech, epss, feeds, kev, nvd, otx, ransomware
@@ -322,8 +324,8 @@ def ioc_summary(by_src: dict[str, list[dict]], pulses: list[dict]) -> list[dict]
     return out
 
 
-def select(threats: list[Threat]) -> list[Threat]:
-    """Top threats: best score first, merge items about the same CVE, max 3 per source kind."""
+def select(threats: list[Threat], include: Callable[[Threat], bool] | None = None) -> list[Threat]:
+    """Merge related threats and apply the limits to accepted candidates in score order."""
     chosen: list[Threat] = []
     per_kind: dict[str, int] = {}
     groups: list[Threat] = []
@@ -339,7 +341,7 @@ def select(threats: list[Threat]) -> list[Threat]:
             continue
         groups.append(t)
     for t in groups:
-        if per_kind.get(t.kind, 0) >= 3:
+        if per_kind.get(t.kind, 0) >= 3 or (include is not None and not include(t)):
             continue
         per_kind[t.kind] = per_kind.get(t.kind, 0) + 1
         chosen.append(t)
@@ -444,12 +446,13 @@ def build(since: datetime, now: datetime, *, fx: Fetcher, writer: ai_mod.AIWrite
     data = collect(since, now, fx=fx, tax=tax, picker=writer if writer.active else None, fcfg=fcfg)
     status, notes = data["stats"]["source_status"], data["notes"]
     verified = data["verified"]
-    candidates = select([t for t in data["threats"] if reference_url(t.url)])
     by_id = {v["id"]: v for v in verified}
     yesterday = previous_details(history_dir, day) or previous_details(out_dir, day)
-    top, items = [], []
+    items = []
     used_ai = False
-    for t in candidates:
+
+    def include(t: Threat) -> bool:
+        nonlocal used_ai
         item = item_view(t, [by_id[cid] for cid in sorted(t.cves) if cid in by_id], data["nvd_by_id"],
                          cves, day.isoformat(), threat_actions(t), EXPLOIT_LABEL)
         facts = {k: item[k] for k in ("summary", "title", "project", "severity_line", "affected", "fixed",
@@ -464,13 +467,14 @@ def build(since: datetime, now: datetime, *, fx: Fetcher, writer: ai_mod.AIWrite
             and number_tokens(item["summary"]) <= number_tokens(s)
             and not content_lint(s, **item["lint"]) else None,
         ) if writer.active else None
-        if normalized(edited or item["summary"]) in yesterday:
-            continue
-        if edited:
-            item["summary"] = edited
-            used_ai = True
-        top.append(t)
+        item["summary"] = edited or item["summary"]
+        if advisory_details(item["summary"], item["affected"], item["fixed"], item["workaround"]) in yesterday:
+            return False
+        used_ai |= bool(edited)
         items.append(item)
+        return True
+
+    top = select([t for t in data["threats"] if reference_url(t.url)], include)
     new_kev_crit = any(r["cvss"] != "N/A" and float(r["cvss"]) >= 9 for r in data["kev_rows"])
     overall = overall_severity(top, new_kev_crit)
     number = store.briefing_number(briefings or [], day.isoformat())

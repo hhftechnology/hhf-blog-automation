@@ -54,6 +54,34 @@ def test_retry_then_fallback_and_zero_call_cache(configure, tmp_path):
     assert len(seen) == 6
 
 
+@pytest.mark.parametrize("failure", ["transport", 503])
+def test_temporary_outage_does_not_cache_no_prose(configure, tmp_path, failure):
+    def unavailable(req):
+        if failure == "transport":
+            raise httpx.ConnectError("temporarily unavailable", request=req)
+        return httpx.Response(failure)
+
+    failed = writer(unavailable)
+    failed.cache_dir = tmp_path
+    for _ in range(3):
+        assert failed.prose("edit", {}, tier="fast") is None
+    assert failed.prose("later edit", {}, tier="fast") is None  # circuits are now open
+    assert not list(tmp_path.rglob("*.json"))
+    restored = writer(lambda req: cf_response("OK"))
+    restored.cache_dir = tmp_path
+    assert restored.prose("edit", {}, tier="fast") == "OK"
+    assert restored.prose("later edit", {}, tier="fast") == "OK"
+
+
+def test_guard_rejections_still_cache_no_prose(configure, tmp_path):
+    rejected = writer(lambda req: cf_response("Unknown CVE-2000-9999."))
+    rejected.cache_dir = tmp_path
+    assert rejected.prose("edit", {}, tier="fast") is None
+    rerun = writer(lambda req: pytest.fail("cached guard rejection called AI"))
+    rerun.cache_dir = tmp_path
+    assert rerun.prose("edit", {}, tier="fast") is None
+
+
 def test_auth_failure_disables_provider_across_tiers(configure):
     configure.setenv("GEMINI_API_KEY", "gemini-test-token")
 

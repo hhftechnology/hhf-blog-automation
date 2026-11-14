@@ -47,7 +47,8 @@ def reference_url(value: str) -> str:
 
 
 def plain_md(value: str) -> str:
-    value = md_text(" ".join(value.split()))
+    # The output escapes backticks, so sanitize their contents as ordinary text.
+    value = "`".join(map(md_text, " ".join(value.split()).split("`")))
     return re.sub(r"([\\`*_\[\]~])", r"\\\1", value)
 
 
@@ -99,7 +100,11 @@ def content_lint(text: str, *, title="", source="", critical=False, exploited=Fa
     return errors
 
 
-def previous_details(out_dir, day) -> set[str]:
+def advisory_details(summary: str, *remediation: str) -> tuple[str, ...]:
+    return (normalized(summary), *(" ".join(visible_text(value).split()) for value in remediation))
+
+
+def previous_details(out_dir, day) -> set[tuple[str, ...]]:
     if out_dir is None:
         return set()
     path = out_dir / f"daily_briefing-{day - timedelta(days=1)}.md"
@@ -107,7 +112,11 @@ def previous_details(out_dir, day) -> set[str]:
         text = path.read_text(encoding="utf-8")
     except (OSError, ValueError):
         return set()
-    return {normalized(p) for p in re.findall(r"(?m)^\*\*Technical Details\*\* : (.+)$", text)}
+    fields = re.findall(
+        r"(?m)^\*\*Technical Details\*\* : (.+)\n\n\* \*\*Severity\*\* : [^\n]+\n"
+        r"\* \*\*Affected\*\* : (.+)\n\* \*\*Fixed\*\* : (.+)\n\* \*\*Workaround\*\* : (.+)$", text,
+    )
+    return {advisory_details(*values) for values in fields}
 
 
 VERSION = r"v?\d+(?:\.\d+)+(?:[-+][a-z0-9]+(?:\.[a-z0-9]+)*)?"

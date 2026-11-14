@@ -42,6 +42,10 @@ def test_advisory_golden_and_cve_link_coverage(mock_fx):
     assert "[CVE-2026-1111](https://nvd.nist.gov" in linked_text("Patch CVE-2026-1111.")
 
 
+def test_daily_markdown_neutralizes_mentions_inside_escaped_backticks():
+    assert linked_text("Contact `@staff`") == "Contact \\`@\u200bstaff\\`"
+
+
 def test_multi_cve_story_preserves_per_cve_evidence(tmp_path):
     window = json.loads(fx_text("nvd_window.json"))
     first, second, _ = [entry["cve"] for entry in window["vulnerabilities"]]
@@ -119,6 +123,43 @@ def test_continuity_keeps_index_when_item_repeats(mock_fx, tmp_path):
     assert repeat["briefing"]["cves"] == first["briefing"]["cves"]
 
 
+def test_continuity_backfills_in_rank_order_after_repeats(mock_fx, tmp_path, monkeypatch):
+    collect = daily.collect
+
+    def collect_ranked(*args, **kwargs):
+        data = collect(*args, **kwargs)
+        data["threats"] = [
+            daily.Threat(f"Story {i}", "", f"https://source.test/story/{i}", f"Publisher {i}",
+                         "news" if i < 4 else "advisory", score=100 - i)
+            for i in range(8)
+        ]
+        return data
+
+    monkeypatch.setattr(daily, "collect", collect_ranked)
+    previous = build_daily(mock_fx)["raw"]
+    item = previous.split("## Top threats\n\n", 1)[1].split("\n---\n", 1)[0]
+    yesterday = NOW.date() - timedelta(days=1)
+    (tmp_path / f"daily_briefing-{yesterday}.md").write_text(item, encoding="utf-8")
+    raw = build_daily(mock_fx, out_dir=tmp_path)["raw"]
+    assert [line for line in raw.splitlines() if line.startswith("### ")] == [
+        f"### **{n}. Story {i}**" for n, i in enumerate(range(1, 6), start=1)
+    ]
+
+
+def test_continuity_keeps_unchanged_summary_with_new_fixed_release(tmp_path):
+    first = build_daily(router_fetcher(tmp_path / "first", {}))["raw"]
+    history = tmp_path / "history"
+    history.mkdir()
+    (history / f"daily_briefing-{NOW.date() - timedelta(days=1)}.md").write_text(first, encoding="utf-8")
+    window = json.loads(fx_text("nvd_window.json"))
+    window["vulnerabilities"][0]["cve"]["descriptions"][0]["value"] += " This issue was fixed in version 2.4.1."
+    fx = router_fetcher(tmp_path / "updated", {route(nvd.URL): json.dumps(window)})
+    updated = build_daily(fx, out_dir=history)["raw"]
+    assert "* **Fixed** : 2.4.1" in updated
+    details = next(line for line in updated.splitlines() if line.startswith("**Technical Details**"))
+    assert details in first
+
+
 @pytest.mark.parametrize(("prose", "expected"), [
     ("As always, update promptly.", "banned phrase"),
     ("Critical changes.", "critical unsupported"),
@@ -151,11 +192,17 @@ def test_split_continuation_appends_after_reader_and_is_reused(monkeypatch):
         username = "bot"
 
         def __init__(self):
-            self.posts = [{"id": 1, "username": self.username}, {"id": 2, "username": "reader", "raw": "Hello!"}]
+            self.posts = [
+                {"id": 1, "username": self.username, "raw": "Previous briefing."},
+                {"id": 2, "username": "reader", "raw": "Hello!"},
+            ]
             self.title_update = None
 
         def get_topic_by_external_id(self, external_id):
             return {"id": 55, "post_stream": {"posts": self.posts}}
+
+        def get_post(self, post_id):
+            return self.posts[post_id - 1]
 
         def create_post(self, topic, raw):
             assert topic == 55
@@ -183,6 +230,20 @@ def test_split_continuation_appends_after_reader_and_is_reused(monkeypatch):
     publish.publish(client, raw=raw.replace("Second", "New second"), **kw)
     assert len(client.posts) == 3 and "New second" in continuation(client, client.get_topic_by_external_id(eid), eid)["raw"]
     assert client.posts[1]["raw"] == "Hello!"
+    old_head, old_reply = client.posts[0]["raw"], client.posts[2]["raw"]
+    edit = client.edit_first_post
+
+    def fail_after_head_write(post_id, raw, **kwargs):
+        edit(post_id, raw, **kwargs)
+        if post_id == 1 and kwargs:
+            raise RuntimeError("topic update failed after writing body")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(client, "edit_first_post", fail_after_head_write)
+        for update in (raw.replace("Second", "Different second"), "Fits now."):
+            with pytest.raises(RuntimeError, match="topic update failed"):
+                publish.publish(client, raw=update, **kw)
+            assert client.posts[0]["raw"] == old_head and client.posts[2]["raw"] == old_reply
     with pytest.raises(ValueError, match="item boundary"):
         publish.publish(client, raw="too large " * 5000, **kw)
     assert "/t/-/55/3" in client.posts[0]["raw"]

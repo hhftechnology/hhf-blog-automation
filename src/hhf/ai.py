@@ -335,6 +335,7 @@ class AIWriter:
         self.calls = []
         self.disabled = set()
         self.failures = {}
+        self.temporary_failures = set()
         self.budget_exhausted = False
 
     @property
@@ -403,7 +404,8 @@ class AIWriter:
             try:
                 stored = json.loads(cache.read_text(encoding="utf-8"))
                 raw, provider = stored["text"], stored["provider"]
-                if raw is None:
+                # Older tier entries did not distinguish an outage from a deterministic fallback.
+                if raw is None and (not tier or stored.get("stable_fallback") is True):
                     return None
                 if isinstance(raw, str) and provider in {p.name for p in self.providers}:
                     text, bad = check(raw)
@@ -421,7 +423,8 @@ class AIWriter:
                 cache.parent.mkdir(parents=True, exist_ok=True)
                 with tempfile.NamedTemporaryFile(dir=cache.parent, delete=False) as file:
                     tmp = Path(file.name)
-                    file.write(json.dumps({"text": raw, "provider": provider}, ensure_ascii=False).encode())
+                    file.write(json.dumps({"text": raw, "provider": provider, "stable_fallback": raw is None},
+                                          ensure_ascii=False).encode())
                 tmp.replace(cache)
             except OSError:
                 log.warning("AI cache write failed")
@@ -434,13 +437,17 @@ class AIWriter:
 
         if tier:
             rejected = False
+            temporary = False
             for p, model in candidates:
                 if self.budget_exhausted:
                     break
-                if p.name in self.disabled or self.failures.get((p.name, model), 0) >= 3:
+                key = p.name, model
+                if p.name in self.disabled or self.failures.get(key, 0) >= 3:
+                    temporary |= key in self.temporary_failures
                     continue
                 raw = self.try_model(p, model, tier, SYSTEM_PROMPT, user, max_tokens or 220)
                 if raw is None:
+                    temporary |= key in self.temporary_failures
                     if rejected:  # one alternate model after a guard rejection
                         break
                     continue
@@ -456,7 +463,8 @@ class AIWriter:
                 self.stats.update(ok=self.stats["ok"] + 1, provider=p.name)
                 remember(text, p.name)
                 return text
-            remember(None, None)
+            if not temporary:
+                remember(None, None)
             return None
 
         transport_failed = False
@@ -574,10 +582,14 @@ class AIWriter:
                 self.calls[-1]["status"] = status if status in ("empty",) else "invalid"
             if status in (401, 403):
                 self.disabled.add(provider.name)
+            if (isinstance(exc, (TransportFailure, httpx.HTTPError)) or status == 429
+                    or (isinstance(status, int) and 500 <= status < 600)):
+                self.temporary_failures.add(key)
             self.stats["failed"] += 1
             self.failures[key] = self.failures.get(key, 0) + 1
             log.warning("AI %s %s failed (%s)%s", provider.name, redact(model), self.calls[-1]["status"],
                         " (circuit opened)" if self.failures[key] == 3 else "")
             return None
         self.failures.pop(key, None)
+        self.temporary_failures.discard(key)
         return raw

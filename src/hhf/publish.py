@@ -1,12 +1,15 @@
 """Publish a markdown article to the Discourse blog. Idempotent on external_id: reruns republish, never duplicate."""
 from __future__ import annotations
 
+import logging
 import os
 import re
 import sys
 from datetime import datetime, timezone
 
 from .discourse import DiscourseClient
+
+log = logging.getLogger(__name__)
 
 
 def make_excerpt(*parts: str, limit: int = 280) -> str:
@@ -38,19 +41,36 @@ def publish(client: DiscourseClient, *, title: str, raw: str, tags: list[str], e
         topic_id = created["topic_id"]
         first_post_id = created.get("id")
         own = None
-    if tail:
-        if own:
-            client.edit_first_post(own["id"], tail)
-            reply = own
-        else:
-            reply = client.create_post(topic_id, tail)
-        head = head.rstrip() + "\n\n" + CONTINUATION_LINK.format(topic=topic_id, post=reply["post_number"]) + "\n"
-    elif own and own.get("raw", "").rstrip() != stale_reply(external_id, topic_id).rstrip():
-        client.edit_first_post(own["id"], stale_reply(external_id, topic_id))
-    if topic or tail:
-        if first_post_id is None:
-            first_post_id = client.get_post_number(topic_id, 1)["id"]
-        client.edit_first_post(first_post_id, head, topic_id=topic_id, title=title, tags=tags)
+    old_head = client.get_post(first_post_id)["raw"] if topic and (tail or own) else None
+    restore = []
+    try:
+        if tail:
+            if own:
+                restore.append((own["id"], own["raw"]))
+                client.edit_first_post(own["id"], tail)
+                reply = own
+            else:
+                reply = client.create_post(topic_id, tail)
+            head = head.rstrip() + "\n\n" + CONTINUATION_LINK.format(topic=topic_id, post=reply["post_number"]) + "\n"
+        if topic or tail:
+            if first_post_id is None:
+                first_post_id = client.get_post_number(topic_id, 1)["id"]
+            if old_head is not None:
+                restore.append((first_post_id, old_head))
+            client.edit_first_post(first_post_id, head, topic_id=topic_id, title=title, tags=tags)
+        if not tail and own:
+            stale = stale_reply(external_id, topic_id)
+            if own["raw"].rstrip() != stale.rstrip():
+                restore.append((own["id"], own["raw"]))
+                client.edit_first_post(own["id"], stale)
+    except Exception:
+        # A metadata write can fail after Discourse accepts the first post body.
+        for post_id, previous in reversed(restore):
+            try:
+                client.edit_first_post(post_id, previous)
+            except Exception:
+                log.error("Could not restore daily briefing post %s after a failed edit", post_id)
+        raise
     if excerpt:
         try:  # cosmetic: must never block the briefing
             client.request("PUT", f"/blog-editor/publications/{topic_id}", json={"publication": {"excerpt": excerpt}})
