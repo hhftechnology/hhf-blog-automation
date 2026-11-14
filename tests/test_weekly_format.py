@@ -648,7 +648,8 @@ def test_seed_posted_script(tmp_path):
     assert json.loads(st.read_text()) == {"posted": {"CVE-2026-94300": "2026-11-04", "GHSA-xv5x-242w-7hf7": "2026-11-04"}}
     ref = mod.extract_ids(open("tests/fixtures/format/reference_4696.md", encoding="utf-8").read())
     assert "CVE-2026-119977" in ref and "GHSA-xv5x-242w-7hf7" in ref
-    seeded = json.load(open("state/posted.json"))["posted"]
+    assert mod.main(["tests/fixtures/format/reference_4696.md", "2026-11-04", "--state", str(st)]) == 0
+    seeded = json.loads(st.read_text(encoding="utf-8"))["posted"]
     assert set(ref) == set(seeded) and set(seeded.values()) == {"2026-11-04"}
 
 
