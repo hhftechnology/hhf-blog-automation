@@ -128,6 +128,20 @@ class BudgetReached(ProviderError):
     pass
 
 
+class TransportFailure(ProviderError):
+    pass
+
+
+def transport_reason(exc: httpx.HTTPError) -> str:
+    if isinstance(exc, httpx.LocalProtocolError):
+        return "invalid local HTTP request"
+    if isinstance(exc, httpx.TimeoutException):
+        return "network timeout"
+    if isinstance(exc, httpx.ConnectError):
+        return "connection or TLS verification failure"
+    return "HTTP transport failure"
+
+
 def retry_once(send, provider: str):
     response = send()
     if response.status_code == 429 or 500 <= response.status_code < 600:
@@ -176,8 +190,8 @@ class Gemini(Provider):
 
         try:
             r = retry_once(send, self.name)
-        except httpx.HTTPError:
-            raise ProviderError("Gemini HTTPS request failed") from None
+        except httpx.HTTPError as exc:
+            raise TransportFailure(f"Gemini HTTPS request failed: {transport_reason(exc)}") from None
         if r.status_code != 200:
             raise ProviderError(f"gemini HTTP {r.status_code}")
         parts = r.json()["candidates"][0]["content"]["parts"]
@@ -206,22 +220,25 @@ class Cloudflare(Provider):
             raise ProviderError("invalid Workers AI budget") from None
         if self.neurons >= self.budget or self.usage_unknown:
             raise BudgetReached()
-        account = os.environ["CLOUDFLARE_ACCOUNT_ID"]
+        account = os.environ["CLOUDFLARE_ACCOUNT_ID"].strip()
         if not re.fullmatch(r"[0-9a-fA-F]{32}", account):
             raise ProviderError("invalid Workers AI account ID")
+        token = os.environ["CLOUDFLARE_API_TOKEN"].strip()
+        if not re.fullmatch(r"[A-Za-z0-9._~-]+", token):
+            raise ProviderError("Workers AI API token must contain only the raw token value")
 
         def send():
             return client.post(
                 CF_URL.format(account=account, model=model), follow_redirects=False,
-                headers={"Authorization": f"Bearer {os.environ['CLOUDFLARE_API_TOKEN']}"},
+                headers={"Authorization": f"Bearer {token}"},
                 json={"messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
                       "temperature": 0.2, "max_tokens": max_tokens},
             )
 
         try:
             r = retry_once(send, self.name)
-        except httpx.HTTPError:
-            raise ProviderError(redact(f"HTTPS request failed ({model})")) from None
+        except httpx.HTTPError as exc:
+            raise TransportFailure(redact(f"HTTPS request failed ({model}): {transport_reason(exc)}")) from None
         error = ProviderError(redact(f"HTTP {r.status_code} ({model})"))
         if r.status_code != 200:
             raise error
@@ -323,7 +340,7 @@ class AIWriter:
             models = [(p.name, (CF_TITLE_MODEL if title else p.model) if isinstance(p, Cloudflare)
                        else os.environ.get("GEMINI_MODEL", DEFAULT_GEMINI_MODEL) if isinstance(p, Gemini)
                        else p.name) for p in self.providers]
-            digest = hashlib.sha256(json.dumps([SYSTEM_PROMPT, user, guard_text, models, max_chars],
+            digest = hashlib.sha256(json.dumps([2, SYSTEM_PROMPT, user, guard_text, models, max_chars],
                                                ensure_ascii=False).encode()).hexdigest()
             cache = self.cache_dir / f"{digest}.json"
             try:
@@ -358,6 +375,7 @@ class AIWriter:
                     except OSError:
                         log.warning("AI cache temporary file cleanup failed")
 
+        transport_failed = False
         for p in self.providers:
             try:
                 if isinstance(p, Cloudflare):
@@ -367,6 +385,7 @@ class AIWriter:
             except BudgetReached:
                 break
             except (ProviderError, httpx.HTTPError, KeyError, IndexError, ValueError, TypeError) as exc:
+                transport_failed |= isinstance(exc, (TransportFailure, httpx.HTTPError))
                 self.stats["failed"] += 1
                 log.warning("AI provider %s failed: %s%s", p.name, type(exc).__name__,
                             f" ({redact(str(exc))})" if isinstance(exc, ProviderError) else "")
@@ -378,9 +397,11 @@ class AIWriter:
                 continue
             self.stats["ok"] += 1
             self.stats["provider"] = p.name
-            remember(text, p.name)
+            if not transport_failed:
+                remember(text, p.name)
             return text
-        remember(None, None)
+        if not transport_failed:
+            remember(None, None)
         return None
 
     def pick(self, text: str, options: list[str]) -> str | None:

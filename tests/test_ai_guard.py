@@ -239,7 +239,16 @@ def test_tls_failure_falls_back_and_echo_is_rejected(cf_credentials, monkeypatch
     assert writer.stats["failed"] == 1 and writer.stats["rejected"] == 1
     assert calls == ["api.cloudflare.com", "generativelanguage.googleapis.com"]
     assert "credential present" in caplog.text and gemini not in caplog.text and cf_credentials not in caplog.text
-    assert all(gemini not in path.read_text() and cf_credentials not in path.read_text() for path in tmp_path.iterdir())
+    assert not list(tmp_path.iterdir())
+
+
+def test_cloudflare_trims_secret_whitespace_and_redacts_the_normalized_token(cf_credentials, monkeypatch):
+    monkeypatch.setenv("CLOUDFLARE_API_TOKEN", f"{cf_credentials}\r\n")
+    client, calls = _gemini_client([httpx.Response(
+        200, json={"success": True, "result": {"response": cf_credentials}})])
+    writer = ai.AIWriter(client=client, weekly=True)
+    assert writer.prose("edit", FACTS) is None
+    assert calls[0].headers["Authorization"] == f"Bearer {cf_credentials}"
 
 
 def test_default_transport_ignores_proxy_and_ca_environment(monkeypatch):

@@ -13,7 +13,8 @@ SECRET_NAMES = (
 
 
 def redact(text: str, *extra: str) -> str:
-    secrets = {s for s in (*extra, *(os.environ.get(name, "") for name in SECRET_NAMES)) if s}
+    values = (*extra, *(os.environ.get(name, "") for name in SECRET_NAMES))
+    secrets = {form for value in values for form in (value, value.strip()) if form}
     encoded = {v for s in secrets for v in (s, quote(s, safe=""), quote_plus(s))}
     if not encoded:
         return text
