@@ -62,7 +62,7 @@ def collect(fx: Fetcher | None = None) -> tuple[dict[str, list[dict]], list[str]
     for name, fn in (("ThreatFox", threatfox), ("URLhaus", urlhaus), ("MalwareBazaar", bazaar)):
         try:
             out[name] = fn(fx)
-        except (SourceError, ValueError, KeyError) as exc:
+        except (SourceError, ValueError, KeyError, TypeError, AttributeError) as exc:
             notes.append(f"{name} failed: {type(exc).__name__}")
             out[name] = []
     return out, notes

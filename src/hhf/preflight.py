@@ -45,13 +45,15 @@ def continuation_marker(external_id: str) -> str:
     return f"<!-- {external_id} continuation -->\n\n"
 
 
-def split_post(raw: str, external_id: str, *, keep_reply: bool = False) -> tuple[str, str | None]:
+def split_post(raw: str, external_id: str, *, keep_reply: bool = False,
+               head_reserve: int = 0) -> tuple[str, str | None]:
     if len(raw) <= MAX_CHARS and not keep_reply:
         return raw, None
     marker = continuation_marker(external_id)
     for boundary in reversed(list(SPLIT.finditer(raw))):
         head, tail = raw[:boundary.end()], raw[boundary.end():]
-        if ITEM.search(head) and ITEM.search(tail) and max(len(head), len(marker) + len(tail)) <= MAX_CHARS:
+        if (ITEM.search(head) and ITEM.search(tail)
+                and max(len(head) + head_reserve, len(marker) + len(tail)) <= MAX_CHARS):
             return head.rstrip() + "\n", marker + tail
     raise ValueError("Cannot fit the advisory into a topic and one reply at an item boundary")
 
@@ -166,6 +168,12 @@ def read_artifact(path: Path, tags: list[str], until: date) -> tuple[str | None,
 
 
 def main(argv: list[str] | None = None) -> int:
+    import sys
+
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "daily":
+        from .daily_preflight import main as daily_main
+        return daily_main(argv[1:])
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--raw", type=Path, required=True)
     parser.add_argument("--title", required=True)

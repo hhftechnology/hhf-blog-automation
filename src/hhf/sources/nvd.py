@@ -57,19 +57,32 @@ def _metric(metrics: dict) -> tuple[float | None, str | None, str | None]:
 
 
 def _cpes(cve: dict) -> list[tuple[str, str]]:
-    out = []
+    return sorted({(parts[3].lower(), parts[4].lower()) for parts, _ in _matches(cve)})
 
-    def walk(nodes):
-        for n in nodes:
-            for m in n.get("cpeMatch", []):
-                parts = m.get("criteria", "").split(":")
-                if len(parts) > 4 and m.get("vulnerable", True):
-                    out.append((parts[3].lower(), parts[4].lower()))
-            walk(n.get("nodes", []))
 
-    for c in cve.get("configurations", []) or []:
-        walk(c.get("nodes", []))
-    return sorted(set(out))
+def _matches(node: dict):
+    for match in node.get("cpeMatch", []):
+        parts = re.split(r"(?<!\\):", match.get("criteria", ""))
+        if len(parts) > 5 and match.get("vulnerable", True):
+            yield parts, match
+    for child in node.get("nodes", []):
+        yield from _matches(child)
+    for config in node.get("configurations") or []:
+        yield from _matches(config)
+
+
+def _affected(cve: dict) -> list[str]:
+    affected = []
+    for parts, match in _matches(cve):
+        product = " ".join(p.replace("_", " ") for p in parts[3:5] if p not in ("*", "-"))
+        bounds = [f"{op} {match[key]}" for key, op in (
+            ("versionStartIncluding", "≥"), ("versionStartExcluding", ">"),
+            ("versionEndIncluding", "≤"), ("versionEndExcluding", "<"),
+        ) if match.get(key)]
+        versions = ", ".join(bounds) or (parts[5] if parts[5] not in ("*", "-") else "")
+        if product and versions:
+            affected.append(f"{product} {versions}")
+    return list(dict.fromkeys(affected))
 
 
 def cvss_version(vector: str | None) -> str:
@@ -91,6 +104,7 @@ def normalize(vuln: dict) -> dict:
         "cvss_version": cvss_version(vector),
         "references": [{"url": r["url"], "tags": r.get("tags", [])} for r in c.get("references", [])],
         "cpes": _cpes(c),
+        "affected_versions": _affected(c),
         "status": c.get("vulnStatus"),
     }
 
@@ -127,11 +141,15 @@ def fetch_window(start: datetime, end: datetime, severities=("CRITICAL", "HIGH")
     return list(out.values())
 
 
-def get_cve(cve_id: str, fx: Fetcher | None = None) -> dict | None:
+def get_cve(cve_id: str, fx: Fetcher | None = None, *, raise_on_failure: bool = False) -> dict | None:
     fx = fx or default_fetcher()
     try:
         data = _get(fx, {"cveId": cve_id}, 6 * 3600)
-    except SourceError:
+    except SourceError as exc:
+        if exc.status == 404:
+            return None  # NVD uses 404 when a CVE is absent from its index
+        if raise_on_failure:
+            raise
         return None
     vs = data.get("vulnerabilities", [])
     return normalize(vs[0]) if vs else None

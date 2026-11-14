@@ -20,11 +20,13 @@ def _dt(s: str | None) -> datetime | None:
     return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
 
 
-def recent(since: datetime, fx: Fetcher | None = None) -> list[dict]:
+def recent(since: datetime, fx: Fetcher | None = None, *, raise_on_failure: bool = False) -> list[dict]:
     fx = fx or default_fetcher()
     try:
         rows = fx.get_json(URL, ttl=1800)
     except SourceError:
+        if raise_on_failure:
+            raise
         return []
     out = []
     for r in rows:

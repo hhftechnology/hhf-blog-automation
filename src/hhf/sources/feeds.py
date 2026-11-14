@@ -30,8 +30,10 @@ def _dt(entry) -> datetime | None:
     return None
 
 
-def parse(text: str | bytes, source: str, kind: str = "news") -> list[dict]:
+def parse(text: str | bytes, source: str, kind: str = "news", *, raise_on_failure: bool = False) -> list[dict]:
     d = feedparser.parse(text)
+    if raise_on_failure and d.bozo and not d.entries:
+        raise SourceError("Feed returned an unreadable document")
     out = []
     for e in d.entries:
         dt = _dt(e)
@@ -46,12 +48,15 @@ def parse(text: str | bytes, source: str, kind: str = "news") -> list[dict]:
 
 
 def fetch_feed(feed: dict, since: datetime, fx: Fetcher | None = None, kind: str = "news",
-               max_items: int = 40) -> list[dict]:
+               max_items: int = 40, *, raise_on_failure: bool = False) -> list[dict]:
     fx = fx or default_fetcher()
     try:
         raw = fx.get_bytes(feed["url"], ttl=1800)
     except SourceError:
+        if raise_on_failure:
+            raise
         return []
-    items = [i for i in parse(raw, feed["name"], feed.get("kind", kind)) if i["published"] and i["published"] >= since]
+    items = [i for i in parse(raw, feed["name"], feed.get("kind", kind), raise_on_failure=raise_on_failure)
+             if i["published"] and i["published"] >= since]
     items.sort(key=lambda i: i["published"], reverse=True)
     return items[:max_items]

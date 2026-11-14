@@ -28,6 +28,10 @@ DEFAULT_CACHE_DIR = Path(os.environ.get("HHF_CACHE_DIR", ".cache"))
 class SourceError(RuntimeError):
     """A source failed. The message never contains a URL query string or a header."""
 
+    def __init__(self, message: str, *, status: int | None = None):
+        super().__init__(message)
+        self.status = status
+
 
 def safe_url(url: str) -> str:
     p = urlsplit(url)
@@ -147,7 +151,7 @@ class Fetcher:
                     self._sleep(min(delay, 60))
                 continue
             if r.status_code >= 400:
-                raise SourceError(f"HTTP {r.status_code} from {safe_url(url)}")
+                raise SourceError(f"HTTP {r.status_code} from {safe_url(url)}", status=r.status_code)
             if len(r.content) > self.max_bytes:
                 raise SourceError(f"response too large from {safe_url(url)}")
             if auth_headers:

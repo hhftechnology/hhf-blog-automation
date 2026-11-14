@@ -9,6 +9,10 @@ on:
         description: "Dry run: write out/*.md, upload it as an artifact, publish nothing"
         type: boolean
         default: true
+      strict_sources:
+        description: "Fail if KEV or NVD coverage is incomplete"
+        type: boolean
+        default: false
 
 permissions:
   contents: write # commit data/
@@ -31,11 +35,11 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -e .
-      - name: Cache source responses
+      - name: Cache source responses, prose, and briefing history
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: .cache
-          key: daily-cache-${{ github.run_id }}
+          key: daily-cache-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: daily-cache-
       - name: Build and publish the daily briefing
         env:
@@ -43,12 +47,22 @@ jobs:
           DISCOURSE_API_KEY: ${{ secrets.DISCOURSE_API_KEY }}
           DISCOURSE_API_USERNAME: ${{ secrets.DISCOURSE_API_USERNAME }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          AI_PROVIDERS: ${{ vars.AI_PROVIDERS }}
+          CF_AI_MODEL_FAST: ${{ vars.CF_AI_MODEL_FAST }}
+          CF_AI_MODEL_CHEAP: ${{ vars.CF_AI_MODEL_CHEAP }}
+          CF_AI_NEURON_BUDGET: ${{ vars.DAILY_CF_AI_NEURON_BUDGET || '2000' }}
+          BLOG_DRAFTS_CATEGORY_ID: ${{ vars.BLOG_DRAFTS_CATEGORY_ID }}
+          BLOG_LIVE_CATEGORY_ID: ${{ vars.BLOG_LIVE_CATEGORY_ID }}
+          STRICT_SOURCES: ${{ inputs.strict_sources || 'false' }}
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           OTX_KEY: ${{ secrets.OTX_KEY }}
           ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }}
         run: |
           args=()
           if [ "$DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ "$STRICT_SOURCES" = "true" ]; then args+=(--strict-sources); fi
           python -m hhf.daily "${args[@]}"
       - name: Upload dry-run output
         if: ${{ always() && env.DRY_RUN == 'true' }}

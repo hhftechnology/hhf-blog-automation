@@ -8,47 +8,80 @@
 | CVE | CVSS | Vendor/product | Exploitation | References |
 |---|---|---|---|---|
 {% for v in verified %}
-| {{ v.id }} | {{ v.cvss }} | {{ v.product | cell }} | {{ v.exploitation }} | {% for name, url in v.links %}[{{ name }}]({{ url }}){{ " · " if not loop.last }}{% endfor %} |
+| {{ v.id | linked }} | {{ v.cvss }} | {{ v.product | linked(cell=true) }} | {{ v.exploitation }} | {% for name, url in v.links %}[{{ name }}]({{ url }}){{ " · " if not loop.last }}{% endfor %} |
 {% endfor %}
 {% else %}
+{% if not coverage %}
 No CVEs were tracked in this window.
 {% endif %}
+{% endif %}
 
+{% if coverage %}
+{{ coverage | join(" ") }}
+{% else %}
 *Checked against NVD and CISA KEV on {{ date }}.*
+{% endif %}
 
 ## TL;DR
 
 {% for b in tldr %}
-- {{ b | md }}
+- {{ b | linked }}
 {% endfor %}
 
 ## Executive summary
 
-{{ executive | md }}
+{{ executive | linked }}
 
 ## Top threats
 
 {% for t in threats %}
-### {{ loop.index }}. {{ t.title | md }}
+### **{{ loop.index }}. {{ t.title | linked }}**
 
-**Severity:** {{ t.severity | capitalize }} | **Type:** {{ t.types | join(", ") if t.types else "general" }} | **Industry:** {{ t.industries | join(", ") if t.industries else "cross-industry" }}
-
-{% if t.summary %}
-{{ t.summary | md }}
-
-{% endif %}
-{% if t.read_more %}
-Read the full report at [{{ t.source | cell }}]({{ t.url }}).
-
-{% endif %}
-**Sources:** [{{ t.source | cell }}]({{ t.url }}){% for s, u in t.also %} · [{{ s | cell }}]({{ u }}){% endfor %}
-
-
-**Recommended actions:**
-
-{% for a in t.actions %}
-- {{ a | md }}
+{% for id, disclosed in t.dates %}
+**{{ id | linked }}** | Disclosed: {{ disclosed }}{{ "  " }}
 {% endfor %}
+{% for id, url in t.ghsas %}
+**[{{ id }}]({{ url }})**{{ "  " }}
+{% endfor %}
+{% if t.project %}
+**Project** : {{ t.project | linked }}
+{% elif not t.is_cve %}
+**Source** : {{ t.source | linked }}
+{% endif %}
+{% if t.new_today %}
+
+**New today**
+{% endif %}
+
+**Technical Details** : {{ t.summary | linked }}
+
+* **Severity** : {{ t.severity_line }}
+* **Affected** : {{ t.affected | linked }}
+* **Fixed** : {{ t.fixed | linked }}
+* **Workaround** : {{ t.workaround | linked }}
+
+{% if t.rows %}
+| CVE | CVSS | Exploitation | EPSS | Action |
+|---|---|---|---|---|
+{% for r in t.rows %}
+| {{ r.cve | linked }} | {{ r.cvss }} | {{ r.exploitation }} | {{ r.epss }} | {{ r.action }} |
+{% endfor %}
+
+{% endif %}
+**Remediation Steps**
+
+{% for step in t.steps %}
+{{ loop.index }}. {{ step | linked }}
+{% endfor %}
+
+**Official References**
+
+{% for name, url in t.official_refs %}
+- {{ name | linked }}: {{ url }}
+{% endfor %}
+
+**Reference** : {% for id, url in t.reference_line %}[{{ id | plain }}]({{ url }}){{ " / " if not loop.last }}{% endfor %}{{ "\n" }}
+---
 
 {% endfor %}
 {% if not threats %}
@@ -61,8 +94,10 @@ No notable threats were identified in this window.
 | CVE | Vendor/product | CVSS | KEV due date | First reported |
 |---|---|---|---|---|
 {% for c in ongoing %}
-| {{ c.id }} | {{ c.product | cell }} | {{ c.cvss }} | {{ c.due }} | {{ c.first_seen }} |
+| {{ c.id | linked }} | {{ c.product | linked(cell=true) }} | {{ c.cvss }} | {{ c.due }} | {{ c.first_seen }} |
 {% endfor %}
+{% elif ongoing_failed %}
+Previously reported KEV entries are unavailable.
 {% else %}
 No earlier KEV items are still inside their remediation window.
 {% endif %}
@@ -70,7 +105,7 @@ No earlier KEV items are still inside their remediation window.
 ## Today's action checklist
 
 {% for a in checklist %}
-- [ ] {{ a | md }}
+- [ ] {{ a | linked }}
 {% endfor %}
 
 ## Indicators
@@ -81,8 +116,11 @@ No earlier KEV items are still inside their remediation window.
 | Sector | Victims | Most active groups |
 |---|---|---|
 {% for s in ransomware %}
-| {{ s.sector | cell }} | {{ s.count }} | {{ s.groups | join(", ") | cell }} |
+| {{ s.sector | linked(cell=true) }} | {{ s.count }} | {{ s.groups | join(", ") | linked(cell=true) }} |
 {% endfor %}
+
+{% else %}
+No ransomware victim data was available in this window.
 
 {% endif %}
 {% if ioc_counts %}
@@ -92,13 +130,21 @@ Raw indicators are not republished here. Pull them from the source pages.
 - {{ i.source }}: {{ i.count }} {{ i.what }} ([view on {{ i.host }}](https://{{ i.host }}))
 {% endfor %}
 {% else %}
-{{ ioc_note }}
+No indicator data was available in this window.
+{% endif %}
+{% if notes %}
+
+*Source notes*
+
+{% for note in notes %}
+- {{ note | linked }}
+{% endfor %}
 {% endif %}
 
 ## Sources
 
-{% for s in sources %}
-- {{ s }}
+{% for name, url, suffix in sources %}
+- [{{ name | plain }}]({{ url }}){{ " " ~ (suffix | linked) if suffix else "" }}
 {% endfor %}
 
 *AI-assisted, published automatically, not human-reviewed; verify with vendors before acting.*

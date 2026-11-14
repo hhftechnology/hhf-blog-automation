@@ -117,7 +117,7 @@ NOW = datetime(2026, 11, 7, 5, 30, tzinfo=timezone.utc)
 
 def build_daily(mock_fx, **kw):
     return daily.build(NOW - timedelta(hours=24), NOW, fx=mock_fx, writer=ai.AIWriter(enabled=False), fcfg=FCFG,
-                       sleep=lambda s: None, **kw)
+                       **kw)
 
 
 def test_daily_end_to_end(mock_fx, monkeypatch):
@@ -132,15 +132,15 @@ def test_daily_end_to_end(mock_fx, monkeypatch):
              "## Today's action checklist", "## Indicators", "## Sources"]
     assert [raw.index(h) for h in heads] == sorted(raw.index(h) for h in heads)
     assert "| CVE | CVSS | Vendor/product | Exploitation | References |" in raw
-    assert "| CVE-2026-1111 | 9.8 | Red Hat Keycloak | Confirmed exploited (CISA KEV) | [NVD]" in raw
+    assert "| [CVE-2026-1111](https://nvd.nist.gov/vuln/detail/CVE-2026-1111) | 9.8 | Red Hat Keycloak | Confirmed exploited (CISA KEV) | [NVD]" in raw
     assert "*Checked against NVD and CISA KEV on 2026-11-07.*" in raw
-    assert raw.count("\n- [ ] ") >= 1 and "Recommended actions:" in raw
+    assert raw.count("\n- [ ] ") >= 1 and "**Remediation Steps**" in raw
     assert "due date of 2026-11-27" in raw
     assert "| Healthcare | 2 |" in raw
-    assert "**Severity:** " in raw and "**Type:** " in raw and "**Industry:** " in raw
+    assert "**Severity** : Critical (CVSS 9.8)" in raw and "**Technical Details** :" in raw
     assert r["tags"][0] == "daily-briefing" and r["tags"][1] in ("critical", "high", "medium", "low") and len(r["tags"]) <= 10
     assert "ransomware" in r["tags"]
-    assert "ABUSECH_AUTH_KEY not set" in raw  # skipped optional source is explained, not silent
+    assert "abuse.ch skipped:" in raw  # skipped optional source is explained, not silent
     assert "ransomware.live" in raw and "CISA" in raw
     assert "AI-assisted, published automatically, not human-reviewed; verify with vendors before acting" in raw
     assert "http://" not in raw.split("## Indicators")[1].split("## Sources")[0]
@@ -151,7 +151,7 @@ def test_daily_no_ai_does_not_copy_publisher_text(mock_fx):
     raw = build_daily(mock_fx)["raw"]
     for copied in ("Patient data was stolen", "disrupted a hospital system", "Attackers exploit a zero-day remote code execution"):
         assert copied not in raw
-    assert "Read the full report at [CISA](https://news.example/hospital)" in raw
+    assert "**Reference** : [CISA](https://news.example/hospital)" in raw
 
 
 def test_daily_records_and_ongoing(mock_fx):
@@ -162,9 +162,10 @@ def test_daily_records_and_ongoing(mock_fx):
     briefs = [{"date": "2026-11-05"}, {"date": "2026-11-06"}, {"date": "2026-11-07"}]
     r = build_daily(mock_fx, briefings=briefs, cves=prev)
     assert r["briefing"]["number"] == 3  # earlier dates + 1, stable on rerun
-    assert "| CVE-2026-9 | Acme VPN | 9.1 | 2026-11-20 | 2026-11-01 |" in r["raw"]
-    assert "CVE-2026-8 |" not in r["raw"]  # due date already passed
-    assert r["raw"].count("| CVE-2026-1111 |") == 1  # in today's set, not repeated as ongoing
+    ongoing = r["raw"].split("## Ongoing: previously reported")[1].split("## Today's action checklist")[0]
+    assert "/CVE-2026-9) | Acme VPN | 9.1 | 2026-11-20 | 2026-11-01 |" in ongoing
+    assert "CVE-2026-8" not in ongoing  # due date already passed
+    assert "CVE-2026-1111" not in ongoing  # in today's set
     rec = next(c for c in r["cve_records"] if c["id"] == "CVE-2026-1111")
     assert rec["exploitation"] == "kev-confirmed" and rec["kev"] and rec["kevDueDate"] == "2026-11-27"
     assert rec["epss"]["date"] == "2026-11-06" and rec["epss"]["percentile"] == 0.985
@@ -172,18 +173,46 @@ def test_daily_records_and_ongoing(mock_fx):
 
 def test_daily_publishes_then_stores(mock_fx, monkeypatch, tmp_path):
     monkeypatch.setattr(daily, "default_fetcher", lambda: mock_fx)
-    monkeypatch.setattr(discourse, "DiscourseClient", lambda: object())
     monkeypatch.setattr(daily, "load_feeds", lambda: FCFG)
     order = []
-    monkeypatch.setattr(publish, "publish", lambda c, **kw: order.append("publish") or {"topic_id": 1, "public_path": "/blog/d"})
+    class Client:
+        category = 112
+
+        def get_topic_by_external_id(self, external_id):
+            order.append("readback")
+            assert external_id == self.article["external_id"]
+            return {"id": 1, "title": self.article["title"], "tags": self.article["tags"],
+                    "category_id": self.category, "post_stream": {"posts": [{"id": 1}]}}
+
+        def get_post_number(self, topic_id, number):
+            assert (topic_id, number) == (1, 1)
+            return {"raw": self.article["raw"]}
+
+        def close(self):
+            pass
+
+    client = Client()
+    monkeypatch.setattr(discourse, "DiscourseClient", lambda: client)
+    monkeypatch.delenv("BLOG_LIVE_CATEGORY_ID", raising=False)
+
+    def live(c, **kw):
+        order.append("publish")
+        c.article = kw
+        return {"topic_id": 1, "public_path": "/blog/d"}
+
+    monkeypatch.setattr(publish, "publish", live)
     real = store.upsert_briefing
     monkeypatch.setattr(store, "upsert_briefing", lambda *a, **k: order.append("store") or real(*a, **k))
-    assert daily.main(["--no-ai", "--data-dir", str(tmp_path)]) == 0
-    assert order == ["publish", "store"]
+    args = ["--no-ai", "--data-dir", str(tmp_path), "--out-dir", str(tmp_path / "out")]
+    assert daily.main(args) == 0
+    assert order == ["publish", "readback", "store"]
     b = store.load_briefings(tmp_path)
     assert b[0]["public_path"] == "/blog/d" and b[0]["number"] == 1
-    assert daily.main(["--no-ai", "--data-dir", str(tmp_path)]) == 0
+    assert daily.main(args) == 0
     assert len(store.load_briefings(tmp_path)) == 1  # rerun upserts, number stable
+    client.category = 113
+    assert daily.main(args) == 1
+    assert order[-2:] == ["publish", "readback"]
 
 
 def test_daily_merges_kev_and_news_on_same_cve():

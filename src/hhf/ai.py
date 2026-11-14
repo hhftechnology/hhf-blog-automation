@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
 import os
 import re
 import tempfile
@@ -165,7 +166,7 @@ def retry_once(send, provider: str, *, empty=None):
                 delay = (parsedate_to_datetime(header) - datetime.now(timezone.utc)).total_seconds()
             except (ValueError, TypeError, OverflowError):
                 delay = 5.0
-        if delay != delay:
+        if math.isnan(delay):
             delay = 5.0
         delay = max(0.0, min(delay, RETRY_AFTER_CAP))
         log.warning("%s HTTP %s, retrying once after %.0fs", provider, response.status_code, delay)

@@ -24,14 +24,33 @@ def publish(client: DiscourseClient, *, title: str, raw: str, tags: list[str], e
             excerpt: str | None = None, category: int | None = None) -> dict:
     if category is not None:
         return publish_weekly(client, title, raw, tags, external_id, category)
+    from .daily_preflight import CONTINUATION_LINK, continuation, split_daily, stale_reply
+
+    head, tail = split_daily(raw, external_id)
     topic = client.get_topic_by_external_id(external_id)
     if topic:
         topic_id = topic["id"]
-        client.edit_first_post(topic["post_stream"]["posts"][0]["id"], raw, topic_id=topic_id, title=title)
+        own = continuation(client, topic, external_id)
+        first_post_id = topic["post_stream"]["posts"][0]["id"]
     else:
         category = int(os.environ.get("BLOG_DRAFTS_CATEGORY_ID") or 113)
-        topic_id = client.create_topic(title=title, raw=raw, category=category, external_id=external_id,
-                                       tags=tags)["topic_id"]
+        created = client.create_topic(title=title, raw=head, category=category, external_id=external_id, tags=tags)
+        topic_id = created["topic_id"]
+        first_post_id = created.get("id")
+        own = None
+    if tail:
+        if own:
+            client.edit_first_post(own["id"], tail)
+            reply = own
+        else:
+            reply = client.create_post(topic_id, tail)
+        head = head.rstrip() + "\n\n" + CONTINUATION_LINK.format(topic=topic_id, post=reply["post_number"]) + "\n"
+    elif own and own.get("raw", "").rstrip() != stale_reply(external_id, topic_id).rstrip():
+        client.edit_first_post(own["id"], stale_reply(external_id, topic_id))
+    if topic or tail:
+        if first_post_id is None:
+            first_post_id = client.get_post_number(topic_id, 1)["id"]
+        client.edit_first_post(first_post_id, head, topic_id=topic_id, title=title, tags=tags)
     if excerpt:
         try:  # cosmetic: must never block the briefing
             client.request("PUT", f"/blog-editor/publications/{topic_id}", json={"publication": {"excerpt": excerpt}})
@@ -39,7 +58,7 @@ def publish(client: DiscourseClient, *, title: str, raw: str, tags: list[str], e
             print(f"warning: excerpt not set for topic {topic_id}: {e}", file=sys.stderr)
     res = client.request("POST", f"/blog-editor/publications/{topic_id}/publish", json={})
     if not isinstance(res, dict) or res.get("status") != "live":
-        raise RuntimeError(f"topic {topic_id} not live after publish: {str(res)[:200]}")
+        raise RuntimeError(f"topic {topic_id} not live after publish")
     return {"topic_id": topic_id, "public_path": res["public_path"]}
 
 
