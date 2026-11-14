@@ -174,7 +174,10 @@ class Gemini(Provider):
                 },
             )
 
-        r = retry_once(send, self.name)
+        try:
+            r = retry_once(send, self.name)
+        except httpx.HTTPError:
+            raise ProviderError("Gemini HTTPS request failed") from None
         if r.status_code != 200:
             raise ProviderError(f"gemini HTTP {r.status_code}")
         parts = r.json()["candidates"][0]["content"]["parts"]
@@ -215,7 +218,10 @@ class Cloudflare(Provider):
                       "temperature": 0.2, "max_tokens": max_tokens},
             )
 
-        r = retry_once(send, self.name)
+        try:
+            r = retry_once(send, self.name)
+        except httpx.HTTPError:
+            raise ProviderError(redact(f"HTTPS request failed ({model})")) from None
         error = ProviderError(redact(f"HTTP {r.status_code} ({model})"))
         if r.status_code != 200:
             raise error
