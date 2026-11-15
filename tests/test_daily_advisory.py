@@ -7,7 +7,7 @@ import pytest
 
 from conftest import fx_text, make_router
 from test_pipelines import FCFG, NOW, build_daily
-from hhf import ai, daily, preflight, publish
+from hhf import ai, daily, daily_preflight, preflight, publish
 from hhf.daily_content import SOURCE_NOTES, content_lint, linked_text
 from hhf.daily_preflight import artifact_text, check_daily, continuation, split_daily, uncovered_cves
 from hhf.sources import abusech, epss, kev, nvd, otx, ransomware
@@ -185,6 +185,23 @@ def test_daily_preflight_cli(mock_fx, tmp_path):
     assert preflight.main(args) == 1
     path.write_text(artifact.replace("CISA confirmed", "As always. CISA confirmed"), encoding="utf-8")
     assert preflight.main(args) == 1
+
+
+def test_public_discussion_uses_anonymous_https(monkeypatch):
+    monkeypatch.setenv("BLOG_URL", "https://blog.test/blog")
+    calls = []
+
+    def route(request):
+        assert "api-key" not in request.headers and "authorization" not in request.headers
+        calls.append(str(request.url))
+        if request.url.host == "blog.test":
+            return httpx.Response(200, text='<div data-topic-id="4899" id="discourse-comments"></div>')
+        return httpx.Response(200, json={"id": 4899, "category_id": 112})
+
+    client = httpx.Client(transport=httpx.MockTransport(route))
+    monkeypatch.setattr(httpx, "Client", lambda **kw: client)
+    assert daily_preflight.public_discussion("https://forum.test", "/blog/daily")["category_id"] == 112
+    assert calls == ["https://blog.test/blog/daily", "https://forum.test/t/4899.json"]
 
 
 def test_split_continuation_appends_after_reader_and_is_reused(monkeypatch):

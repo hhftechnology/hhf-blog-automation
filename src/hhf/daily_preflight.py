@@ -6,12 +6,14 @@ import json
 import os
 import re
 from datetime import date, datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 
+import httpx
 import yaml
 
 from .classify import Classification, topic_tags
-from .credentials import redact
+from .credentials import redact, require_https
 from .daily_content import CVE_RE, LINK_RE, SENTENCE, SOURCE_NOTES, content_lint, normalized, reference_url
 from .discourse import DiscourseClient, DiscourseError
 from .preflight import ITEM, MAX_CHARS, continuation_marker, forbidden_hits, split_post
@@ -116,7 +118,43 @@ def editorial_errors(body, metadata):
     return errors
 
 
-def check_daily(artifact, day: date, *, client=None, topic_id=None, tax=None) -> int:
+class BlogDiscussion(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.topic_id = None
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "div" and attrs.get("id") == "discourse-comments":
+            self.topic_id = attrs.get("data-topic-id")
+
+
+def public_discussion(forum_url: str, public_path: str) -> dict:
+    # shortcut: read the public comments embed, use Blog Editor's API if it exposes the discussion ID
+    match = re.fullmatch(r"/(?:blog/)?([a-z0-9][a-z0-9-]*)/?", public_path)
+    if not match:
+        raise ValueError("Invalid Blog Editor public path")
+    blog_url = (os.environ.get("BLOG_URL") or f"{forum_url}/blog").rstrip("/")
+    article_url = httpx.URL(f"{blog_url}/{match[1]}")
+    forum = httpx.URL(forum_url)
+    require_https(article_url)
+    require_https(forum)
+    with httpx.Client(timeout=15, trust_env=False, follow_redirects=False) as public:
+        response = public.get(article_url)
+        response.raise_for_status()
+        embed = BlogDiscussion()
+        embed.feed(response.text)
+        if not re.fullmatch(r"[1-9][0-9]*", embed.topic_id or ""):
+            raise ValueError("Public blog article has no discussion topic ID")
+        response = public.get(f"{forum_url.rstrip('/')}/t/{embed.topic_id}.json")
+        response.raise_for_status()
+        discussion = response.json()
+        if discussion.get("id") != int(embed.topic_id):
+            raise ValueError("Public discussion topic ID does not match the article")
+        return discussion
+
+
+def check_daily(artifact, day: date, *, client=None, topic_id=None, public_path=None, tax=None) -> int:
     try:
         metadata, title, raw = read_artifact(artifact)
         external_id = metadata["external_id"]
@@ -152,17 +190,31 @@ def check_daily(artifact, day: date, *, client=None, topic_id=None, tax=None) ->
                 expected = head.rstrip() + "\n\n" + CONTINUATION_LINK.format(topic=topic_id, post=own["post_number"])
             actual_tags = {tag["name"] if isinstance(tag, dict) else tag for tag in topic.get("tags", [])}
             category = int(os.environ.get("BLOG_LIVE_CATEGORY_ID") or 112)
+            live_category = topic["category_id"]
+            category_ok = live_category == category
+            label = f"live category {live_category} (expected {category})"
+            if not category_ok and live_category == int(os.environ.get("BLOG_DRAFTS_CATEGORY_ID") or 113):
+                if public_path:
+                    discussion = public_discussion(client.base_url, public_path)
+                    actual = discussion["category_id"]
+                    category_ok = discussion["title"] == title and actual == category
+                    label = f"public discussion category {actual} (expected {category}) and title"
+                else:
+                    label += ", supply --public-path to check the public discussion"
             checks += [
                 (topic["title"] == title and actual_tags == set(tags), "live title and tags"),
                 (expected.rstrip() == live.rstrip() and len(live) <= MAX_CHARS, "live first post"),
                 ((own is None or own["raw"].rstrip() == stale_reply(external_id, topic_id).rstrip()) if tail is None
                  else bool(own and own["raw"].rstrip() == tail.rstrip() and len(own["raw"]) <= MAX_CHARS),
                  "live continuation"),
-                (topic["category_id"] == category, f"live category {topic['category_id']} (expected {category})"),
+                (category_ok, label),
             ]
         for ok, label in checks:
             print(redact(f" {label.strip()} — {'ok' if ok else 'failed'}"))
         return int(not all(ok for ok, _ in checks))
+    except httpx.HTTPError as exc:
+        print(f"Daily pre-flight failed: public discussion readback ({type(exc).__name__})")
+        return 1
     except (DiscourseError, OSError, ValueError, KeyError, TypeError, AttributeError, yaml.YAMLError) as exc:
         print(redact(f"Daily pre-flight failed: {exc}"))
         return 1
@@ -174,14 +226,17 @@ def main(argv=None) -> int:
     parser.add_argument("--date", type=date.fromisoformat, default=datetime.now(timezone.utc).date())
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--topic-id", type=int)
+    parser.add_argument("--public-path", help="Blog Editor public path for a source topic in drafts")
     args = parser.parse_args(argv)
     if args.live != (args.topic_id is not None):
         parser.error("--live and --topic-id must be used together")
+    if args.public_path and not args.live:
+        parser.error("--public-path requires --live")
     client = None
     try:
         raw = args.raw.read_text(encoding="utf-8")
         client = DiscourseClient() if args.live else None
-        return check_daily(raw, args.date, client=client, topic_id=args.topic_id)
+        return check_daily(raw, args.date, client=client, topic_id=args.topic_id, public_path=args.public_path)
     except (OSError, ValueError) as exc:
         print(redact(f"Daily pre-flight failed: {exc}"))
         return 1

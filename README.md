@@ -59,7 +59,7 @@ Variables / environment:
 | `BLOG_URL` | `https://forum.hhf.technology/blog` | public blog URL, used for API links |
 | `PAGES_URL` | `https://hhftechnology.github.io/hhf-blog-automation` | GitHub Pages URL, used in the feed and index |
 | `BLOG_DRAFTS_CATEGORY_ID` | `113` | daily blog drafts category |
-| `BLOG_LIVE_CATEGORY_ID` | `112` | expected live daily topic category, checked after Blog Editor publishes |
+| `BLOG_LIVE_CATEGORY_ID` | `112` | expected category of the live daily topic or the separate public discussion Blog Editor creates |
 | `WEEKLY_CATEGORY_ID` | `86` | weekly category, validated by pre-flight |
 | `AI_PROVIDERS` | `cloudflare,gemini` | editor provider order |
 | `CF_AI_MODEL` | `@cf/openai/gpt-oss-120b` | weekly prose model; short titles use Granite Micro |

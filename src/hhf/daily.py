@@ -633,7 +633,7 @@ def main(argv: list[str] | None = None) -> int:
         pub = publish_mod.publish(client, title=res["title"], raw=res["raw"], tags=res["tags"],
                                   external_id=res["external_id"], excerpt=res["excerpt"])
         print(redact(json.dumps(pub)))
-        if check_daily(artifact, now.date(), client=client, topic_id=pub["topic_id"]):
+        if check_daily(artifact, now.date(), client=client, topic_id=pub["topic_id"], public_path=pub["public_path"]):
             return 1
     except (DiscourseError, RuntimeError, ValueError, KeyError) as exc:
         log.error("Daily publish failed: %s", redact(str(exc)))
