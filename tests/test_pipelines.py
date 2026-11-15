@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
-from hhf import ai, daily, discourse, preflight, publish, store, weekly
+from hhf import ai, daily, daily_preflight, discourse, preflight, publish, store, weekly
 from hhf.facts import Advisory
 
 WL = weekly.load_watchlist()
@@ -176,6 +176,7 @@ def test_daily_publishes_then_stores(mock_fx, monkeypatch, tmp_path):
     monkeypatch.setattr(daily, "load_feeds", lambda: FCFG)
     order = []
     class Client:
+        base_url = "https://forum.test"
         category = 112
 
         def get_topic_by_external_id(self, external_id):
@@ -194,6 +195,7 @@ def test_daily_publishes_then_stores(mock_fx, monkeypatch, tmp_path):
     client = Client()
     monkeypatch.setattr(discourse, "DiscourseClient", lambda: client)
     monkeypatch.delenv("BLOG_LIVE_CATEGORY_ID", raising=False)
+    monkeypatch.delenv("BLOG_DRAFTS_CATEGORY_ID", raising=False)
 
     def live(c, **kw):
         order.append("publish")
@@ -211,6 +213,21 @@ def test_daily_publishes_then_stores(mock_fx, monkeypatch, tmp_path):
     assert daily.main(args) == 0
     assert len(store.load_briefings(tmp_path)) == 1  # rerun upserts, number stable
     client.category = 113
+
+    discussion = {"category_id": 112}
+
+    def public_discussion(forum_url, public_path):
+        assert (forum_url, public_path) == ("https://forum.test", "/blog/d")
+        order.append("public discussion")
+        return {"title": client.article["title"], **discussion}
+
+    monkeypatch.setattr(daily_preflight, "public_discussion", public_discussion)
+    assert daily.main(args) == 0
+    assert order[-4:] == ["publish", "readback", "public discussion", "store"]
+    discussion["category_id"] = 114
+    assert daily.main(args) == 1
+    assert order[-3:] == ["publish", "readback", "public discussion"]
+    client.category = 114
     assert daily.main(args) == 1
     assert order[-2:] == ["publish", "readback"]
 
