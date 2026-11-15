@@ -153,5 +153,26 @@
       "iot-ot"
     ],
     "title": "Daily Threat Briefing: Saturday, November 14, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-120522",
+      "CVE-2026-19907",
+      "CVE-2026-129433"
+    ],
+    "date": "2026-11-15",
+    "industries": [
+      "finance",
+      "technology"
+    ],
+    "number": 8,
+    "public_path": "/daily-threat-briefing-sunday-november-15-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "ransomware",
+      "data-breach"
+    ],
+    "title": "Daily Threat Briefing: Sunday, November 15, 2026"
   }
 ]

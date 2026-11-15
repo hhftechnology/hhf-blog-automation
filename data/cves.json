@@ -480,6 +480,30 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2026-120522": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-15",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-15",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-120522",
+      "https://plugins.trac.wordpress.org/changeset/3656663/cloud-storage-manager",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/58fd04ae-fff2-42b1-ae98-168195d84290?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-120779": {
     "cvss": {
       "score": 9.6,
@@ -915,6 +939,35 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-129433": {
+    "cvss": {
+      "score": 9.4,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:L/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-15",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-15",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129433",
+      "https://github.com/Dokploy/dokploy",
+      "https://github.com/Dokploy/dokploy/blob/v0.31.0/packages/server/src/utils/backups/utils.ts#L152",
+      "https://github.com/Dokploy/dokploy/commit/b24006e16e95a10ce3daf739d06ac783e5c70ba0",
+      "https://github.com/Dokploy/dokploy/pull/5908",
+      "https://github.com/Dokploy/dokploy/releases/tag/v0.31.1",
+      "https://github.com/Dokploy/dokploy/security/advisories/GHSA-j329-jw7j-rxjm",
+      "https://www.vulncheck.com/advisories/dokploy-before-0.31.1-os-command-injection-via-compose-backup-servicename"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-15266": {
     "cvss": {
       "score": 9.8,
@@ -964,6 +1017,30 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-19868"
     ],
     "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-19907": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-15",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-15",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-19907",
+      "https://plugins.trac.wordpress.org/changeset/3701532/shipo",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/ce5ea515-5ae1-4771-9bfb-5a0f4b3fce22?source=cve"
+    ],
+    "status": "Deferred",
     "verification": "nvd+kev"
   },
   "CVE-2026-20320": {
