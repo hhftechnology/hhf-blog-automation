@@ -267,23 +267,23 @@
   },
   "CVE-2026-114713": {
     "cvss": {
-      "score": 8.6,
+      "score": 7.7,
       "severity": "high",
       "source": "NVD",
-      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:N/I:H/A:N",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:N/I:H/A:N",
       "version": "3.1"
     },
     "epss": {
-      "date": "2026-11-13",
-      "percentile": 0.23297,
-      "score": 0.00302
+      "date": "2026-11-15",
+      "percentile": 0.43875,
+      "score": 0.00508
     },
     "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-14",
     "kev": true,
     "kevDateAdded": "2026-11-13",
     "kevDueDate": "2026-11-16",
-    "lastUpdated": "2026-11-14",
+    "lastUpdated": "2026-11-16",
     "product": "UnrealIRCd UnrealIRCd",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-114713",
@@ -293,7 +293,7 @@
       "http://www.openwall.com/lists/oss-security/2026/11/08/1",
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-114713"
     ],
-    "status": "Undergoing Analysis",
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-116606": {
@@ -966,6 +966,86 @@
       "https://www.vulncheck.com/advisories/dokploy-before-0.31.1-os-command-injection-via-compose-backup-servicename"
     ],
     "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-129483": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-16",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-16",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129483",
+      "https://gist.github.com/afldl/18d15d3f5a1df99411e35000c7de80db",
+      "https://github.com/cyrusimap/cyrus-sasl/blob/cyrus-sasl-2.1.28/plugins/srp.c#L2046-L2050",
+      "https://github.com/cyrusimap/cyrus-sasl/commit/fb3724f43dc50247ff2bf02135457d6d77031654",
+      "https://github.com/cyrusimap/cyrus-sasl/issues/896",
+      "https://seclists.org/oss-sec/2026/q4/122",
+      "https://www.vulncheck.com/advisories/cyrus-sasl-through-2.1.28-srp-authentication-bypass-via-plugins-srp-c"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-129550": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:N/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-16",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-16",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129550",
+      "https://github.com/tenseijs/tensei",
+      "https://github.com/tenseijs/tensei/blob/630f39038c7751178465f990fb358b0c2d5b1914/packages/auth/src/index.ts#L311-L333",
+      "https://github.com/tenseijs/tensei/issues/398",
+      "https://www.vulncheck.com/advisories/tensei-through-0.11.5-privilege-escalation-via-self-assigned-roles-in-tensei-auth"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-129552": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-16",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-16",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129552",
+      "https://github.com/tenseijs/tensei",
+      "https://github.com/tenseijs/tensei/blob/630f39038c7751178465f990fb358b0c2d5b1914/packages/auth/src/index.ts#L94-L98",
+      "https://github.com/tenseijs/tensei/issues/398",
+      "https://www.vulncheck.com/advisories/tensei-through-0.11.5-authentication-bypass-via-hard-coded-jwt-secret-in-tensei-auth"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   },
   "CVE-2026-15266": {

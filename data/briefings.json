@@ -174,5 +174,25 @@
       "data-breach"
     ],
     "title": "Daily Threat Briefing: Sunday, November 15, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-114713",
+      "CVE-2026-129483",
+      "CVE-2026-129550",
+      "CVE-2026-129552"
+    ],
+    "date": "2026-11-16",
+    "industries": [
+      "healthcare"
+    ],
+    "number": 9,
+    "public_path": "/daily-threat-briefing-monday-november-16-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "ransomware"
+    ],
+    "title": "Daily Threat Briefing: Monday, November 16, 2026"
   }
 ]
