@@ -1048,6 +1048,98 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2026-129952": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-17",
+      "percentile": 0.45633,
+      "score": 0.00533
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-17",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-17",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129952",
+      "https://github.com/surmon-china/nodepress/blob/v8.5.1/src/app.config.ts#L62-L72",
+      "https://github.com/surmon-china/nodepress/blob/v8.5.1/src/core/auth/auth.module.ts#L17-L29",
+      "https://github.com/surmon-china/nodepress/blob/v8.5.1/src/main.ts#L44-L60",
+      "https://github.com/surmon-china/nodepress/issues/143",
+      "https://www.vulncheck.com/advisories/nodepress-through-8.5.1-authentication-bypass-via-default-jwt-signing-secret"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-130366": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-17",
+      "percentile": 0.49007,
+      "score": 0.00594
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-17",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-17",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-130366",
+      "https://github.com/adminneo-org/adminneo/commit/7905a3583d25ccfa598665d717dd722e4f7ce52e",
+      "https://github.com/adminneo-org/adminneo/releases/tag/v5.9.1",
+      "https://github.com/adminneo-org/adminneo/security/advisories/GHSA-h9x9-p972-28q9",
+      "https://www.vulncheck.com/advisories/adminneo-before-5.9.1-authentication-bypass-via-clickhouse-driver-defaultpasswordhash"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-130371": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-17",
+      "percentile": 0.45645,
+      "score": 0.00534
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-17",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-17",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-130371",
+      "https://github.com/thorsten/phpMyFAQ/commit/eae6674d64bb6f53caf703d3f38b657f0c16a13c",
+      "https://github.com/thorsten/phpMyFAQ/releases/tag/4.1.12",
+      "https://github.com/thorsten/phpMyFAQ/releases/tag/4.2.0-RC.2",
+      "https://github.com/thorsten/phpMyFAQ/security/advisories/GHSA-jhf3-22r2-88hm",
+      "https://www.vulncheck.com/advisories/phpmyfaq-before-4.1.12-and-4.2.0-alpha-before-4.2.0-rc.2-unauthenticated-reinstall-via-web-installer"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-15266": {
     "cvss": {
       "score": 9.8,
@@ -1247,6 +1339,37 @@
       "https://url.sap/sapsecuritypatchday"
     ],
     "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-84869": {
+    "cvss": {
+      "score": 9.9,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-17",
+      "percentile": 0.68014,
+      "score": 0.01173
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-17",
+    "kev": true,
+    "kevDateAdded": "2026-09-11",
+    "kevDueDate": "2026-09-14",
+    "lastUpdated": "2026-11-17",
+    "product": "ConnectWise ScreenConnect",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-84869",
+      "https://github.com/ConnectWise-Advisories/Disclosures/tree/main/CVE-2026-84869",
+      "https://www.connectwise.com/company/trust/advisories",
+      "https://www.connectwise.com/company/trust/security-bulletins/2026-09-08-screenconnect-bulletin",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-84869",
+      "https://www.huntress.com/blog/rogue-screenconnect-installations"
+    ],
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-89103": {
