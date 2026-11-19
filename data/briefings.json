@@ -234,5 +234,33 @@
       "vulnerability-exploit"
     ],
     "title": "Daily Threat Briefing: Wednesday, November 18, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2024-10441",
+      "CVE-2026-90436",
+      "CVE-2026-90817",
+      "CVE-2026-109618",
+      "CVE-2026-109619",
+      "CVE-2026-40217",
+      "CVE-2026-129448",
+      "CVE-2026-14492",
+      "CVE-2026-132622",
+      "CVE-2018-25443",
+      "CVE-2026-123007",
+      "CVE-2026-115560"
+    ],
+    "date": "2026-11-19",
+    "industries": [
+      "technology",
+      "education"
+    ],
+    "number": 12,
+    "public_path": "/daily-threat-briefing-thursday-november-19-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit"
+    ],
+    "title": "Daily Threat Briefing: Thursday, November 19, 2026"
   }
 ]

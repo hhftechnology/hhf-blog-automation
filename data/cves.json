@@ -1,4 +1,63 @@
 {
+  "CVE-2018-25443": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.496,
+      "score": 0.00602
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2018-25443",
+      "https://github.com/fex-team/ueditor/blob/v1.4.3.3/net/App_Code/CrawlerHandler.cs",
+      "https://github.com/projectdiscovery/nuclei-templates/blob/main/http/vulnerabilities/other/ueditor-file-upload.yaml",
+      "https://web.archive.org/web/20190612114715/https://www.freebuf.com/vuls/181814.html",
+      "https://www.vulncheck.com/advisories/baidu-ueditor-1.4.0-1.4.3.3-unrestricted-file-upload-via-controller-ashx"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2024-10441": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.82512,
+      "score": 0.0215
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-11-18",
+    "kevDueDate": "2026-11-21",
+    "lastUpdated": "2026-11-19",
+    "product": "Synology DiskStation Manager (DSM)",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2024-10441",
+      "https://www.synology.com/en-global/security/advisory/Synology_SA_24_20",
+      "https://www.synology.com/en-global/security/advisory/Synology_SA_24_23",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2024-10441"
+    ],
+    "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-102895": {
     "cvss": {
       "score": 9.8,
@@ -164,6 +223,74 @@
       "https://www.vulncheck.com/advisories/planet-gs-5220-8p2t2s-stack-buffer-overflow-via-webstax-auth-cookie"
     ],
     "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-109618": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.99999,
+      "score": 0.99999
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-10-26",
+    "kevDueDate": "2026-10-29",
+    "lastUpdated": "2026-11-19",
+    "product": "PHP Group PHP",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-109618",
+      "https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w",
+      "http://seclists.org/fulldisclosure/2026/Oct/51",
+      "http://www.openwall.com/lists/oss-security/2026/10/21/6",
+      "http://www.openwall.com/lists/oss-security/2026/10/23/5",
+      "https://github.com/rapid7/metasploit-framework/pull/22139",
+      "https://arcticwolf.com/resources/blog/php2shell-critical-php-vulnerabilities-enable-unauthenticated-remote-code-execution/",
+      "https://cert-portal.siemens.com/productcert/html/ssa-166980.html",
+      "https://cert-portal.siemens.com/productcert/html/ssa-566435.html"
+    ],
+    "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-109619": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.99999,
+      "score": 0.99999
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-10-26",
+    "kevDueDate": "2026-10-29",
+    "lastUpdated": "2026-11-19",
+    "product": "PHP Group PHP",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-109619",
+      "https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp",
+      "http://www.openwall.com/lists/oss-security/2026/10/21/16",
+      "http://www.openwall.com/lists/oss-security/2026/10/21/17",
+      "http://www.openwall.com/lists/oss-security/2026/10/21/23",
+      "http://www.openwall.com/lists/oss-security/2026/10/21/7",
+      "http://www.openwall.com/lists/oss-security/2026/10/22/14",
+      "http://www.openwall.com/lists/oss-security/2026/10/22/15",
+      "http://www.openwall.com/lists/oss-security/2026/10/22/16"
+    ],
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-110697": {
@@ -394,6 +521,22 @@
     ],
     "status": "Undergoing Analysis",
     "verification": "nvd+kev"
+  },
+  "CVE-2026-115560": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-115560"
+    ],
+    "status": null,
+    "verification": "unverified"
   },
   "CVE-2026-115731": {
     "cvss": {
@@ -673,6 +816,40 @@
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-120868",
       "https://support.citrix.com/support-home/kbsearch/article?articleNumber=CTX697305"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-123007": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.9379,
+      "score": 0.06358
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123007",
+      "https://my.f5.com/manage/s/article/K000163926",
+      "https://access.redhat.com/security/cve/cve-2026-123007",
+      "https://cyberscoop.com/nginx-critical-vulnerabilities-exploits/",
+      "https://github.com/Azure/aks-app-routing-operator/issues/623",
+      "https://github.com/advisories/GHSA-m4q8-cf44-f42r",
+      "https://github.com/chainguard-forks/ingress-nginx/pull/69",
+      "https://github.com/nginx/nginx/commit/b89c4100bf6762a45e4a6463eaf4b70368277c94",
+      "https://github.com/nginx/nginx/issues/2002"
     ],
     "status": "Received",
     "verification": "nvd+kev"
@@ -1095,6 +1272,36 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-129448": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.68625,
+      "score": 0.01191
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129448",
+      "https://github.com/apache/roller/pull/171",
+      "https://lists.apache.org/thread.html/lnz4s26tv6hdo03wngtdbpfj4hg4gtds",
+      "https://lists.apache.org/thread/cc0jck13nb9vvcmzxzwotr6n16mx28z9",
+      "https://www.cve.org/CVERecord?id=CVE-2026-82384"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-129483": {
     "cvss": {
       "score": 9.3,
@@ -1267,6 +1474,69 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-132622": {
+    "cvss": {
+      "score": 9.4,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.83947,
+      "score": 0.02336
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-132622",
+      "https://vuldb.com/cve/CVE-2026-132622",
+      "https://vuldb.com/submit/1045343",
+      "https://vuldb.com/vuln/439768",
+      "https://vuldb.com/vuln/439768/cti"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-14492": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.84104,
+      "score": 0.02356
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-19",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-19",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-14492",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/admin/class-local-sync-files-op.php#L777",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/admin/class-local-sync-files-op.php#L800",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/includes/class-local-sync-handle-server-requests.php#L131",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/includes/class-local-sync-handle-server-requests.php#L36",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/includes/class-local-sync-handle-server-requests.php#L400",
+      "https://plugins.trac.wordpress.org/browser/local-sync/tags/1.1.11/includes/class-local-sync.php#L221",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/26edb085-4737-46a1-be76-b4b955d19aa0?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-15266": {
     "cvss": {
       "score": 9.8,
@@ -1369,6 +1639,39 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-20320"
     ],
     "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-40217": {
+    "cvss": {
+      "score": 8.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.99193,
+      "score": 0.61911
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-11-18",
+    "kevDueDate": "2026-12-02",
+    "lastUpdated": "2026-11-19",
+    "product": "BerriAI LiteLLM",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-40217",
+      "https://www.x41-dsec.de/lab/advisories/x41-2026-001-litellm/",
+      "https://access.redhat.com/errata/RHSA-2026:24866",
+      "https://access.redhat.com/errata/RHSA-2026:30056",
+      "https://access.redhat.com/security/cve/CVE-2026-40217",
+      "https://bugzilla.redhat.com/show_bug.cgi?id=2457301",
+      "https://security.access.redhat.com/data/csaf/v2/vex/2026/cve-2026-40217.json",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-40217"
+    ],
+    "status": "Undergoing Analysis",
     "verification": "nvd+kev"
   },
   "CVE-2026-6460": {
@@ -1545,6 +1848,64 @@
       "https://www.wordfence.com/threat-intel/vulnerabilities/id/40a04176-cec2-4723-a5c6-23ca2ea6ef97?source=cve"
     ],
     "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-90436": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.7866,
+      "score": 0.01773
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-11-18",
+    "kevDueDate": "2026-11-21",
+    "lastUpdated": "2026-11-19",
+    "product": "Apache Axis",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-90436",
+      "https://github.com/apache/axis-axis1-java/commit/41f3b4e8d04e310ca81f86b92630ab2c11d608bd",
+      "https://lists.apache.org/thread.html/8slf0j9gz35z56t0glt5h0ncwlbn4bdz",
+      "http://www.openwall.com/lists/oss-security/2026/11/06/12",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-90436"
+    ],
+    "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-90817": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.97974,
+      "score": 0.25187
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-19",
+    "kev": true,
+    "kevDateAdded": "2026-11-18",
+    "kevDueDate": "2026-11-21",
+    "lastUpdated": "2026-11-19",
+    "product": "Vanderbilt University Research Electronic Data Capture (REDCap)",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-90817",
+      "https://www.securifera.com/advisories/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-90817"
+    ],
+    "status": "Undergoing Analysis",
     "verification": "nvd+kev"
   }
 }
