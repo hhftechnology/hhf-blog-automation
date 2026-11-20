@@ -262,5 +262,30 @@
       "vulnerability-exploit"
     ],
     "title": "Daily Threat Briefing: Thursday, November 19, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-14914",
+      "CVE-2026-123890",
+      "CVE-2026-76466",
+      "CVE-2026-80188",
+      "CVE-2026-76536",
+      "CVE-2026-115560",
+      "CVE-2026-126714",
+      "CVE-2026-99312",
+      "CVE-2026-132825"
+    ],
+    "date": "2026-11-20",
+    "industries": [],
+    "number": 13,
+    "public_path": "/daily-threat-briefing-friday-november-20-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "zero-day",
+      "apt",
+      "credential-theft"
+    ],
+    "title": "Daily Threat Briefing: Friday, November 20, 2026"
   }
 ]

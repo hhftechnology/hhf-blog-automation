@@ -523,20 +523,27 @@
     "verification": "nvd+kev"
   },
   "CVE-2026-115560": {
-    "cvss": null,
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
     "epss": null,
     "exploitation": "none",
     "firstSeen": "2026-11-19",
     "kev": false,
     "kevDateAdded": null,
     "kevDueDate": null,
-    "lastUpdated": "2026-11-19",
+    "lastUpdated": "2026-11-20",
     "product": "—",
     "references": [
-      "https://nvd.nist.gov/vuln/detail/CVE-2026-115560"
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-115560",
+      "https://github.com/php/php-src/security/advisories/GHSA-658j-r8rw-q6mx"
     ],
-    "status": null,
-    "verification": "unverified"
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
   },
   "CVE-2026-115731": {
     "cvss": {
@@ -1040,6 +1047,29 @@
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2026-123890": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-123890",
+      "https://support.broadcom.com/web/ecx/support-content-notification/-/external/content/SecurityAdvisories/0/39495"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-123966": {
     "cvss": {
       "score": 9.3,
@@ -1214,6 +1244,33 @@
       "https://www.vulncheck.com/advisories/vvveb-through-1.0.8.6-webshell-upload-via-theme-installer-validfile-bypass"
     ],
     "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-126714": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-126714",
+      "https://github.com/php/php-src/security/advisories/GHSA-fm2m-fjf5-v3cp",
+      "https://bugzilla.suse.com/show_bug.cgi?id=1290690",
+      "https://depthfirst.com/phpAfterShell",
+      "https://github.com/semgrep/detection-scripts/pull/14",
+      "https://ubuntu.com/security/CVE-2026-126714"
+    ],
+    "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
   "CVE-2026-129110": {
@@ -1504,6 +1561,40 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-132825": {
+    "cvss": {
+      "score": 7.4,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:L/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.07031,
+      "score": 0.00174
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-132825",
+      "https://github.com/ruby/ruby/security/advisories/GHSA-34m4-m9fh-gqp5",
+      "https://news.ycombinator.com/item?id=50554038",
+      "https://www.ruby-lang.org/en/news/2026/11/18/multiple-vulnerabilities-in-regexp-and-string/",
+      "http://www.openwall.com/lists/oss-security/2026/11/20/5",
+      "https://bugzilla.suse.com/show_bug.cgi?id=1290919",
+      "https://github.com/evenomn/CVE-2026-132825",
+      "https://github.com/semgrep/detection-scripts/pull/16",
+      "https://gitlab.com/gitlab-org/omnibus-gitlab/-/commit/8fcf9d6372da3fe553bd21c3beae70634d6ba936"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-14492": {
     "cvss": {
       "score": 9.8,
@@ -1535,6 +1626,29 @@
       "https://www.wordfence.com/threat-intel/vulnerabilities/id/26edb085-4737-46a1-be76-b4b955d19aa0?source=cve"
     ],
     "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-14914": {
+    "cvss": {
+      "score": 10.0,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-14914",
+      "https://siberguvenlik.gov.tr/guvenlik-bildirimleri/detay/tr-26-1588"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   },
   "CVE-2026-15266": {
@@ -1724,6 +1838,56 @@
     "status": "Awaiting Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2026-76466": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.36701,
+      "score": 0.00417
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-76466",
+      "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-vcs-static-cred-hr7EWZ8t"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-76536": {
+    "cvss": {
+      "score": 9.4,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-76536",
+      "https://advisory.splunk.com/advisories/SVD-2026-1103"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-76954": {
     "cvss": {
       "score": 9.8,
@@ -1769,6 +1933,30 @@
       "https://url.sap/sapsecuritypatchday"
     ],
     "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-80188": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-80188",
+      "https://buddyboss.com/resources/buddyboss-addons/addons-1-2-2/",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/9cb4a3f2-af99-473d-b70e-1ea1afca23ff?source=cve"
+    ],
+    "status": "Deferred",
     "verification": "nvd+kev"
   },
   "CVE-2026-84869": {
@@ -1906,6 +2094,36 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-90817"
     ],
     "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-99312": {
+    "cvss": {
+      "score": 8.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-19",
+      "percentile": 0.08393,
+      "score": 0.00187
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-20",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-20",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-99312",
+      "https://git.kernel.org/stable/c/24f644ea26c2ebb7b14c3baa2aa92d37fde3095f",
+      "https://git.kernel.org/stable/c/c7c288d178cb0b78d3464a616b16b1aa0b316049",
+      "https://git.kernel.org/stable/c/d47bae9eb33b3ca0843a0954b7d0cafb354c99b0",
+      "https://git.kernel.org/stable/c/f55a3e4e08dc004b4bab7c1e9323d7e7e96e266a"
+    ],
+    "status": "Received",
     "verification": "nvd+kev"
   }
 }
