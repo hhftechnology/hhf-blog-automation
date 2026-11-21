@@ -58,6 +58,35 @@
     "status": "Undergoing Analysis",
     "verification": "nvd+kev"
   },
+  "CVE-2025-42884": {
+    "cvss": {
+      "score": 6.5,
+      "severity": "medium",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-20",
+      "percentile": 0.2048,
+      "score": 0.00276
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-21",
+    "kev": true,
+    "kevDateAdded": "2026-11-20",
+    "kevDueDate": "2026-11-23",
+    "lastUpdated": "2026-11-21",
+    "product": "SAP NetWeaver",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2025-42884",
+      "https://me.sap.com/notes/3660969",
+      "https://url.sap/sapsecuritypatchday",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2025-42884"
+    ],
+    "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-102895": {
     "cvss": {
       "score": 9.8,
@@ -781,6 +810,35 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-120539": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-21",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-21",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-120539",
+      "https://github.com/seventhqueen/buddypress-restrict/releases/tag/1.5.5",
+      "https://plugins.trac.wordpress.org/browser/bp-restrict/tags/1.5.4/admin/class-bp-restrict-admin.php#L213",
+      "https://plugins.trac.wordpress.org/browser/bp-restrict/tags/1.5.4/admin/class-bp-restrict-pmpro.php#L184",
+      "https://plugins.trac.wordpress.org/browser/bp-restrict/tags/1.5.4/admin/class-bp-restrict-pmpro.php#L187",
+      "https://plugins.trac.wordpress.org/browser/bp-restrict/tags/1.5.4/includes/class-bp-restrict.php#L172",
+      "https://plugins.trac.wordpress.org/browser/bp-restrict/tags/1.5.4/includes/class-bp-restrict.php#L210",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/fab68c0b-2211-4cc4-a112-f0011f9d72ed?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-120779": {
     "cvss": {
       "score": 9.6,
@@ -1055,19 +1113,25 @@
       "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
       "version": "3.1"
     },
-    "epss": null,
-    "exploitation": "none",
+    "epss": {
+      "date": "2026-11-20",
+      "percentile": 0.58845,
+      "score": 0.00843
+    },
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-20",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-20",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-20",
+    "kevDueDate": "2026-11-23",
+    "lastUpdated": "2026-11-21",
+    "product": "Broadcom VMware vCenter",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-123890",
-      "https://support.broadcom.com/web/ecx/support-content-notification/-/external/content/SecurityAdvisories/0/39495"
+      "https://support.broadcom.com/web/ecx/support-content-notification/-/external/content/SecurityAdvisories/0/39495",
+      "https://cloud.google.com/blog/topics/threat-intelligence/armory-castle-exploits-vsphere?e=48754805",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-123890"
     ],
-    "status": "Received",
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-123966": {
@@ -1338,25 +1402,26 @@
       "version": "3.1"
     },
     "epss": {
-      "date": "2026-11-19",
-      "percentile": 0.68625,
+      "date": "2026-11-20",
+      "percentile": 0.68723,
       "score": 0.01191
     },
-    "exploitation": "none",
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-19",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-19",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-20",
+    "kevDueDate": "2026-11-23",
+    "lastUpdated": "2026-11-21",
+    "product": "Apache Roller",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-129448",
       "https://github.com/apache/roller/pull/171",
       "https://lists.apache.org/thread.html/lnz4s26tv6hdo03wngtdbpfj4hg4gtds",
       "https://lists.apache.org/thread/cc0jck13nb9vvcmzxzwotr6n16mx28z9",
-      "https://www.cve.org/CVERecord?id=CVE-2026-82384"
+      "https://www.cve.org/CVERecord?id=CVE-2026-82384",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-129448"
     ],
-    "status": "Received",
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-129483": {
@@ -1469,6 +1534,22 @@
     ],
     "status": "Deferred",
     "verification": "nvd+kev"
+  },
+  "CVE-2026-129975": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-21",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-21",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129975"
+    ],
+    "status": null,
+    "verification": "unverified"
   },
   "CVE-2026-130366": {
     "cvss": {
@@ -1755,6 +1836,30 @@
     "status": "Analyzed",
     "verification": "nvd+kev"
   },
+  "CVE-2026-23871": {
+    "cvss": {
+      "score": 3.5,
+      "severity": "low",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:R/S:U/C:L/I:N/A:N",
+      "version": "3.1"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-21",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-21",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-23871",
+      "https://www.facebook.com/security/advisories/cve-2026-23871",
+      "https://www.whatsapp.com/security/advisories/2026"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-40217": {
     "cvss": {
       "score": 8.8,
@@ -1847,22 +1952,24 @@
       "version": "3.1"
     },
     "epss": {
-      "date": "2026-11-19",
-      "percentile": 0.36701,
+      "date": "2026-11-20",
+      "percentile": 0.36836,
       "score": 0.00417
     },
-    "exploitation": "none",
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-20",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-20",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-20",
+    "kevDueDate": "2026-11-23",
+    "lastUpdated": "2026-11-21",
+    "product": "Cisco Expressway Series",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-76466",
-      "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-vcs-static-cred-hr7EWZ8t"
+      "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-vcs-static-cred-hr7EWZ8t",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-76466",
+      "https://www.f6.ru/media-center/press-releases/cisco-cve-2026-76466/"
     ],
-    "status": "Awaiting Analysis",
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-76536": {
