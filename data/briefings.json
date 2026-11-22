@@ -312,5 +312,26 @@
       "zero-day"
     ],
     "title": "Daily Threat Briefing: Saturday, November 21, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-125294",
+      "CVE-2026-133993",
+      "CVE-2026-134292"
+    ],
+    "date": "2026-11-22",
+    "industries": [
+      "education",
+      "healthcare"
+    ],
+    "number": 15,
+    "public_path": "/daily-threat-briefing-sunday-november-22-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "ransomware",
+      "data-breach"
+    ],
+    "title": "Daily Threat Briefing: Sunday, November 22, 2026"
   }
 ]
