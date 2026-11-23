@@ -786,6 +786,33 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2026-120382": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.69299,
+      "score": 0.01214
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-120382",
+      "https://www.synology.com/en-global/security/advisory/Synology_SA_26_21"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-120522": {
     "cvss": {
       "score": 9.8,
@@ -1636,6 +1663,34 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-131914": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:A/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.50367,
+      "score": 0.00614
+    },
+    "exploitation": "source-reported",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-131914",
+      "https://codeplexarchive.org/project/AntiCSRF",
+      "https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0048.md"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-132622": {
     "cvss": {
       "score": 9.4,
@@ -1748,6 +1803,126 @@
       "https://nvd.nist.gov/vuln/detail/CVE-2026-134292",
       "https://github.com/surrealdb/surrealdb/security/advisories/GHSA-5w6j-qm42-4rc2",
       "https://www.vulncheck.com/advisories/surrealdb-1.0.0-before-4.0.0-function-capability-bypass-via-javascript-built-in-bridge"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-134624": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N/SC:H/SI:H/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.2969,
+      "score": 0.00354
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-134624",
+      "https://me.n-able.com/s/security-advisory/aArVy0000002mrlKAA"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-134814": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.50077,
+      "score": 0.00608
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-134814",
+      "https://github.com/keichi/binary-parser/blob/v2.3.0/lib/binary_parser.ts#L26-L35",
+      "https://github.com/keichi/binary-parser/commit/110206bb126a80071158fb0e2e3d7cc658f2bfe4",
+      "https://github.com/keichi/binary-parser/commit/4b26e04c396253e704ad8e41b928d9e31316f62e",
+      "https://github.com/keichi/binary-parser/security/advisories/GHSA-xmxc-6c22-m377",
+      "https://www.vulncheck.com/advisories/binary-parser-before-2.3.1-code-injection-via-string-typed-parser-options"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-134815": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.55914,
+      "score": 0.00751
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-134815",
+      "https://github.com/steveukx/git-js/blob/simple-git%404.0.2/packages/argv-parser/src/vulnerabilities/detect-vulnerable-flags.ts#L71",
+      "https://github.com/steveukx/git-js/commit/c8ee6bb4dd0c1259af31da821dc68d74ff5d6f10",
+      "https://github.com/steveukx/git-js/releases/tag/%40simple-git%2Fargv-parser%403.0.0",
+      "https://github.com/steveukx/git-js/releases/tag/simple-git%404.1.0",
+      "https://www.vulncheck.com/advisories/simple-git-before-4.1.0-argument-injection-via-exec-option-in-ls-remote"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-134882": {
+    "cvss": {
+      "score": 10.0,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-23",
+      "percentile": 0.85271,
+      "score": 0.02524
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-23",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-23",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-134882",
+      "https://vuldb.com/cve/CVE-2026-134882",
+      "https://vuldb.com/submit/1054781",
+      "https://vuldb.com/vuln/442238",
+      "https://vuldb.com/vuln/442238/cti",
+      "https://www.totolink.net/"
     ],
     "status": "Deferred",
     "verification": "nvd+kev"
@@ -2151,8 +2326,8 @@
       "version": "3.1"
     },
     "epss": {
-      "date": "2026-11-17",
-      "percentile": 0.68014,
+      "date": "2026-11-23",
+      "percentile": 0.68278,
       "score": 0.01173
     },
     "exploitation": "kev-confirmed",
@@ -2160,7 +2335,7 @@
     "kev": true,
     "kevDateAdded": "2026-09-11",
     "kevDueDate": "2026-09-14",
-    "lastUpdated": "2026-11-17",
+    "lastUpdated": "2026-11-23",
     "product": "ConnectWise ScreenConnect",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-84869",
