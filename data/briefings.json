@@ -357,5 +357,26 @@
       "data-breach"
     ],
     "title": "Daily Threat Briefing: Monday, November 23, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-133968",
+      "CVE-2026-134624",
+      "CVE-2026-135202",
+      "CVE-2026-135211",
+      "CVE-2026-135743",
+      "CVE-2026-87268",
+      "CVE-2026-123903"
+    ],
+    "date": "2026-11-24",
+    "industries": [],
+    "number": 17,
+    "public_path": "/daily-threat-briefing-tuesday-november-24-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "zero-day"
+    ],
+    "title": "Daily Threat Briefing: Tuesday, November 24, 2026"
   }
 ]
