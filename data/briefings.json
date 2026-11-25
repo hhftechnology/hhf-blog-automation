@@ -378,5 +378,29 @@
       "zero-day"
     ],
     "title": "Daily Threat Briefing: Tuesday, November 24, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-103406",
+      "CVE-2026-131914",
+      "CVE-2026-132224",
+      "CVE-2026-132165",
+      "CVE-2026-135792",
+      "CVE-2026-135797",
+      "CVE-2026-136549",
+      "CVE-2026-120705",
+      "CVE-2026-129243"
+    ],
+    "date": "2026-11-25",
+    "industries": [],
+    "number": 18,
+    "public_path": "/daily-threat-briefing-wednesday-november-25-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit",
+      "iot-ot",
+      "zero-day"
+    ],
+    "title": "Daily Threat Briefing: Wednesday, November 25, 2026"
   }
 ]

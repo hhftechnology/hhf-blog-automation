@@ -118,6 +118,33 @@
     "status": "Analyzed",
     "verification": "nvd+kev"
   },
+  "CVE-2026-103406": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-25",
+      "percentile": 0.56019,
+      "score": 0.0086
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-25",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-25",
+    "product": "Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-103406",
+      "https://supportportal.juniper.net/JSA112183"
+    ],
+    "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-105133": {
     "cvss": {
       "score": 6.9,
@@ -866,6 +893,22 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-120705": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-25",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-25",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-120705"
+    ],
+    "status": null,
+    "verification": "unverified"
+  },
   "CVE-2026-120779": {
     "cvss": {
       "score": 9.6,
@@ -1431,6 +1474,22 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-129243": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-25",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-25",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-129243"
+    ],
+    "status": null,
+    "verification": "unverified"
+  },
   "CVE-2026-129433": {
     "cvss": {
       "score": 9.4,
@@ -1688,23 +1747,74 @@
       "version": "4.0"
     },
     "epss": {
-      "date": "2026-11-23",
-      "percentile": 0.50367,
-      "score": 0.00614
+      "date": "2026-11-25",
+      "percentile": 0.9189,
+      "score": 0.04292
     },
-    "exploitation": "source-reported",
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-23",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-23",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-24",
+    "kevDueDate": "2026-11-27",
+    "lastUpdated": "2026-11-25",
+    "product": "Idunno AntiCsrf",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-131914",
       "https://codeplexarchive.org/project/AntiCSRF",
-      "https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0048.md"
+      "https://github.com/mandiant/Vulnerability-Disclosures/blob/master/2026/MNDT-2026-0048.md",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-131914"
     ],
-    "status": "Received",
+    "status": "Analyzed",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-132165": {
+    "cvss": null,
+    "epss": null,
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-25",
+    "kev": true,
+    "kevDateAdded": "2026-11-24",
+    "kevDueDate": "2026-11-27",
+    "lastUpdated": "2026-11-25",
+    "product": "Drupal Core",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+    ],
+    "status": null,
+    "verification": "unverified"
+  },
+  "CVE-2026-132224": {
+    "cvss": {
+      "score": 7.1,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:L/UI:N/VC:N/VI:H/VA:N/SC:H/SI:H/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-25",
+      "percentile": 0.52543,
+      "score": 0.00784
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-25",
+    "kev": true,
+    "kevDateAdded": "2026-11-24",
+    "kevDueDate": "2026-11-27",
+    "lastUpdated": "2026-11-25",
+    "product": "Optimizely Web Experimentation",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-132224",
+      "https://arstechnica.com/security/2026/11/malicious-code-delivered-through-optimizely-hits-visitors-to-hundreds-of-sites/",
+      "https://blog.report-uri.com/worlds-largest-brands-infected-with-malware-via-optimizely/",
+      "https://github.com/brave/adblock-resources/pull/355",
+      "https://krebsonsecurity.com/2026/11/attackers-used-optimizely-to-a-b-test-malware-on-top-websites/",
+      "https://news.ycombinator.com/item?id=50524767",
+      "https://pages.optimizely.com/rs/947-RKE-048/images/Security%20Incident%20Report%20-%20Optimizely%20Web%20Experimentation%20-%20Nov%2017%202026.pdf",
+      "https://scotthelme.co.uk/reflecting-on-the-optimizely-incident-and-why-we-keep-failing/",
+      "https://status.optimizely.com/incidents/ftw0fh9wx43z"
+    ],
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-132622": {
@@ -2070,6 +2180,100 @@
       "https://www.vulncheck.com/advisories/ffmpeg-4.3-before-9.1-heap-out-of-bounds-read-write-via-dynaudnorm-filter"
     ],
     "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-135792": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-25",
+      "percentile": 0.84301,
+      "score": 0.02337
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-25",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-25",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-135792",
+      "https://github.com/nenghun/IoT/blob/main/Panabit/rce3/Unauthenticated%20OS%20Command%20Injection.md",
+      "https://vuldb.com/cve/CVE-2026-135792",
+      "https://vuldb.com/submit/1055813",
+      "https://vuldb.com/vuln/442755",
+      "https://vuldb.com/vuln/442755/cti"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-135797": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-25",
+      "percentile": 0.84302,
+      "score": 0.02337
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-25",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-25",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-135797",
+      "https://github.com/nenghun/IoT/blob/main/Volans%20NGFW%20(nf51)/Root_RCE/Volans%20NGFW%20(nf51)_rce.md",
+      "https://vuldb.com/cve/CVE-2026-135797",
+      "https://vuldb.com/submit/1055817",
+      "https://vuldb.com/vuln/442767",
+      "https://vuldb.com/vuln/442767/cti"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-136549": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-25",
+      "percentile": 0.8326,
+      "score": 0.02206
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-25",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-25",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-136549",
+      "https://github.com/Zeyfrost/tenda-rx3-vulns/blob/master/cmd_injection_remoteIp/detail.md",
+      "https://vuldb.com/cve/CVE-2026-136549",
+      "https://vuldb.com/submit/1057767",
+      "https://vuldb.com/vuln/443407",
+      "https://vuldb.com/vuln/443407/cti",
+      "https://www.tenda.com.cn/"
+    ],
+    "status": "Deferred",
     "verification": "nvd+kev"
   },
   "CVE-2026-14492": {
