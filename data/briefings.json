@@ -402,5 +402,33 @@
       "zero-day"
     ],
     "title": "Daily Threat Briefing: Wednesday, November 25, 2026"
+  },
+  {
+    "cves": [
+      "CVE-2026-103406",
+      "CVE-2026-133303",
+      "CVE-2026-133323",
+      "CVE-2026-133469",
+      "CVE-2023-25914",
+      "CVE-2023-25915",
+      "CVE-2025-41450",
+      "CVE-2026-133311",
+      "CVE-2026-133275",
+      "CVE-2026-133324",
+      "CVE-2026-132165",
+      "CVE-2026-136823",
+      "CVE-2026-137090",
+      "CVE-2026-77230",
+      "CVE-2026-136716"
+    ],
+    "date": "2026-11-26",
+    "industries": [],
+    "number": 19,
+    "public_path": "/daily-threat-briefing-thursday-november-26-2026",
+    "severity": "critical",
+    "threats": [
+      "vulnerability-exploit"
+    ],
+    "title": "Daily Threat Briefing: Thursday, November 26, 2026"
   }
 ]

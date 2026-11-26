@@ -29,6 +29,68 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2023-25914": {
+    "cvss": {
+      "score": 8.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.79569,
+      "score": 0.01845
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Danfoss AK-SM 800A Series",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2023-25914",
+      "https://csirt.divd.nl/CVE-2023-25914",
+      "https://csirt.divd.nl/DIVD-2023-00025",
+      "https://csirt.divd.nl/CVE-2023-25914",
+      "https://csirt.divd.nl/DIVD-2023-00025",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2023-25914"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2023-25915": {
+    "cvss": {
+      "score": 8.8,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.85331,
+      "score": 0.02485
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Danfoss AK-SM 800A Series",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2023-25915",
+      "https://csirt.divd.nl/CVE-2023-25915",
+      "https://csirt.divd.nl/DIVD-2023-00025",
+      "https://csirt.divd.nl/CVE-2023-25915",
+      "https://csirt.divd.nl/DIVD-2023-00025",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2023-25915"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
   "CVE-2024-10441": {
     "cvss": {
       "score": 9.8,
@@ -56,6 +118,35 @@
       "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2024-10441"
     ],
     "status": "Undergoing Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2025-41450": {
+    "cvss": {
+      "score": 7.5,
+      "severity": "high",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.91857,
+      "score": 0.04271
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-12-09",
+    "lastUpdated": "2026-11-26",
+    "product": "Danfoss AK-SM 800A Series",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2025-41450",
+      "https://www.danfoss.com/en/service-and-support/coordinated-vulnerability-disclosure/danfoss-security-advisories/dsa-2025-03-01/",
+      "https://github.com/msuiche/fromagegate",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2025-41450"
+    ],
+    "status": "Modified",
     "verification": "nvd+kev"
   },
   "CVE-2025-42884": {
@@ -127,22 +218,23 @@
       "version": "3.1"
     },
     "epss": {
-      "date": "2026-11-25",
-      "percentile": 0.56019,
-      "score": 0.0086
+      "date": "2026-11-26",
+      "percentile": 0.75157,
+      "score": 0.01535
     },
     "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-25",
     "kev": true,
     "kevDateAdded": "2026-11-25",
     "kevDueDate": "2026-11-28",
-    "lastUpdated": "2026-11-25",
+    "lastUpdated": "2026-11-26",
     "product": "Hewlett Packard Enterprise (HPE) Juniper Session Smart Conductor and Session Smart Router",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-103406",
-      "https://supportportal.juniper.net/JSA112183"
+      "https://supportportal.juniper.net/JSA112183",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-103406"
     ],
-    "status": "Undergoing Analysis",
+    "status": "Analyzed",
     "verification": "nvd+kev"
   },
   "CVE-2026-105133": {
@@ -1769,19 +1861,24 @@
   },
   "CVE-2026-132165": {
     "cvss": null,
-    "epss": null,
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.96627,
+      "score": 0.11053
+    },
     "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-25",
     "kev": true,
     "kevDateAdded": "2026-11-24",
     "kevDueDate": "2026-11-27",
-    "lastUpdated": "2026-11-25",
+    "lastUpdated": "2026-11-26",
     "product": "Drupal Core",
     "references": [
-      "https://nvd.nist.gov/vuln/detail/CVE-2026-132165"
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-132165",
+      "https://www.drupal.org/sa-core-2026-017"
     ],
-    "status": null,
-    "verification": "unverified"
+    "status": "Received",
+    "verification": "nvd+kev"
   },
   "CVE-2026-132224": {
     "cvss": {
@@ -1879,6 +1976,183 @@
       "https://gitlab.com/gitlab-org/omnibus-gitlab/-/commit/8fcf9d6372da3fe553bd21c3beae70634d6ba936"
     ],
     "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133275": {
+    "cvss": {
+      "score": 5.3,
+      "severity": "medium",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.52058,
+      "score": 0.00771
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Mitel MiCollab",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133275",
+      "https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012",
+      "https://accenture.github.io/cyber-intelligence/micollab-exploitation/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133275"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133303": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.71078,
+      "score": 0.01326
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Mitel MiCollab",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133303",
+      "https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012",
+      "https://accenture.github.io/cyber-intelligence/micollab-exploitation/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133303"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133311": {
+    "cvss": {
+      "score": 5.9,
+      "severity": "medium",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.61187,
+      "score": 0.00985
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-12-09",
+    "lastUpdated": "2026-11-26",
+    "product": "Mitel MiCollab",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133311",
+      "https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012",
+      "https://accenture.github.io/cyber-intelligence/micollab-exploitation/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133311"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133323": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.93713,
+      "score": 0.05628
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Mitel MiCollab",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133323",
+      "https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012",
+      "https://accenture.github.io/cyber-intelligence/micollab-exploitation/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133323"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133324": {
+    "cvss": {
+      "score": 5.3,
+      "severity": "medium",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:N",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.54808,
+      "score": 0.00832
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Mitel MiCollab",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133324",
+      "https://www.mitel.com/support/security-advisories/mitel-product-security-advisory-misa-2026-0012",
+      "https://accenture.github.io/cyber-intelligence/micollab-exploitation/",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133324"
+    ],
+    "status": "Modified",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-133469": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.987,
+      "score": 0.31768
+    },
+    "exploitation": "kev-confirmed",
+    "firstSeen": "2026-11-26",
+    "kev": true,
+    "kevDateAdded": "2026-11-25",
+    "kevDueDate": "2026-11-28",
+    "lastUpdated": "2026-11-26",
+    "product": "Vates Xen Orchestra",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-133469",
+      "https://docs.vates.tech/security-advisories/advisories/2026/vates-sa-2026-062",
+      "https://github.com/vatesfr/xen-orchestra/commit/50166fe3a49c02069d35ba9046ca4a1f77f4e11d",
+      "https://github.com/vatesfr/xen-orchestra/pull/10748",
+      "https://github.com/vatesfr/xen-orchestra/security/advisories/GHSA-2r3w-c2vx-fv5g",
+      "https://github.com/vatesfr/xen-orchestra/security/advisories/GHSA-2r3w-c2vx-fv5g",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-133469"
+    ],
+    "status": "Modified",
     "verification": "nvd+kev"
   },
   "CVE-2026-133968": {
@@ -2276,6 +2550,89 @@
     "status": "Deferred",
     "verification": "nvd+kev"
   },
+  "CVE-2026-136716": {
+    "cvss": null,
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.62273,
+      "score": 0.01014
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-26",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-26",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-136716",
+      "https://www.drupal.org/sa-core-2026-019"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-136823": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.85199,
+      "score": 0.02466
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-26",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-26",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-136823",
+      "https://github.com/Zzzhangxxx/cve/blob/main/D-Link_R32_A1_1.10B02_flupl_self_fpath_OS_Command_Injection.md",
+      "https://vuldb.com/cve/CVE-2026-136823",
+      "https://vuldb.com/submit/1059269",
+      "https://vuldb.com/vuln/443782",
+      "https://vuldb.com/vuln/443782/cti",
+      "https://www.dlink.com/"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-137090": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.84086,
+      "score": 0.02309
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-26",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-26",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-137090",
+      "https://github.com/emanuelmoraes-dev/build-git-clone/blob/68bc305028d04c9a71a030c4b0b5cc36450201b9/src/index.ts#L77",
+      "https://github.com/emanuelmoraes-dev/build-git-clone/commit/3d55e64e5b7c61e560b5d030d6a918cad5c67a29",
+      "https://github.com/emanuelmoraes-dev/build-git-clone/pull/1",
+      "https://www.vulncheck.com/advisories/build-git-clone-before-1.0.4-os-command-injection-in-clone-via-repository-url"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-14492": {
     "cvss": {
       "score": 9.8,
@@ -2638,6 +2995,40 @@
       "https://nvd.nist.gov/vuln/detail/CVE-2026-76964",
       "https://me.sap.com/notes/3778530",
       "https://url.sap/sapsecuritypatchday"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-77230": {
+    "cvss": {
+      "score": 9.2,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-26",
+      "percentile": 0.76605,
+      "score": 0.01629
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-26",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-26",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-77230",
+      "https://github.com/camunda/camunda/commit/5870c91d4ec8c2dae96db60f3261daed2273baf2",
+      "https://github.com/camunda/camunda/commit/82b490cd41a685118b63a378d8963334711b7d8d",
+      "https://github.com/camunda/camunda/commit/aaf0498ec37dc9b43dbbab2616f3bf5303f911ce",
+      "https://github.com/camunda/camunda/commit/fc363d6d0fc7999463f23d98700b292af1737916",
+      "https://github.com/camunda/camunda/releases/tag/8.10.10",
+      "https://github.com/camunda/camunda/releases/tag/8.8.47",
+      "https://github.com/camunda/camunda/releases/tag/8.9.29",
+      "https://www.vulncheck.com/advisories/camunda-8-insecure-deserialization-via-web-session-storage"
     ],
     "status": "Received",
     "verification": "nvd+kev"
