@@ -303,6 +303,36 @@
     "status": "Analyzed",
     "verification": "nvd+kev"
   },
+  "CVE-2026-106125": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-27",
+      "percentile": 0.69111,
+      "score": 0.01239
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-27",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-27",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-106125",
+      "https://github.com/tiennguyenvan/sneeit-framework/blob/main/includes/lib/lib-utilities.php#L2-L12",
+      "https://github.com/tiennguyenvan/sneeit-framework/blob/main/includes/menus/menus-compact.php#L141-L142",
+      "https://github.com/tiennguyenvan/sneeit-framework/blob/main/includes/menus/menus-compact.php#L487-L497",
+      "https://www.wordfence.com/threat-intel/vulnerabilities/id/9654f07e-e595-46d4-b093-5d2ab4389806?source=cve"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-107331": {
     "cvss": {
       "score": 9.9,
@@ -2633,6 +2663,63 @@
     "status": "Received",
     "verification": "nvd+kev"
   },
+  "CVE-2026-137499": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-27",
+      "percentile": 0.6785,
+      "score": 0.0119
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-27",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-27",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-137499",
+      "https://github.com/Budibase/budibase/security/advisories/GHSA-jm85-crv2-88px",
+      "https://www.vulncheck.com/advisories/budibase-3.41.0-before-4.0.0-account-takeover-via-unverified-email-oidc-linking"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-137544": {
+    "cvss": {
+      "score": 9.4,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": {
+      "date": "2026-11-27",
+      "percentile": 0.73882,
+      "score": 0.01461
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-27",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-27",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-137544",
+      "https://github.com/laradashboard/laradashboard/commit/44ddc4a6b2d64c4fb6f801b2de2008be455d980a",
+      "https://github.com/laradashboard/laradashboard/security/advisories/GHSA-75q6-qrv2-96rx",
+      "https://www.vulncheck.com/advisories/laradashboard-before-1.5.0-path-traversal-rce-via-module-json-namespace-parsing"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
   "CVE-2026-14492": {
     "cvss": {
       "score": 9.8,
@@ -3247,6 +3334,40 @@
       "https://git.kernel.org/stable/c/c7c288d178cb0b78d3464a616b16b1aa0b316049",
       "https://git.kernel.org/stable/c/d47bae9eb33b3ca0843a0954b7d0cafb354c99b0",
       "https://git.kernel.org/stable/c/f55a3e4e08dc004b4bab7c1e9323d7e7e96e266a"
+    ],
+    "status": "Received",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-99362": {
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
+    },
+    "epss": {
+      "date": "2026-11-27",
+      "percentile": 0.51398,
+      "score": 0.00755
+    },
+    "exploitation": "none",
+    "firstSeen": "2026-11-27",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-27",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-99362",
+      "https://git.kernel.org/stable/c/1a5a227bca6a8a9f9d31230697aeb84c62a21da6",
+      "https://git.kernel.org/stable/c/35ff1a7a7e3835c3e974bc5c45d335897564ceae",
+      "https://git.kernel.org/stable/c/37fc2ec211630360e9aefcaaec8730db964645f2",
+      "https://git.kernel.org/stable/c/6a26c5473bb112d8420ffd48d5331bc5fb5a2065",
+      "https://git.kernel.org/stable/c/aff12e327620258123f847d7d06565f4555c5cb4",
+      "https://git.kernel.org/stable/c/cd303eb29cf34a6780f4c42aca5b8ca4a05a5d59",
+      "https://git.kernel.org/stable/c/ed98b0c57e5e84290c5b35428144ab26778905f3",
+      "https://git.kernel.org/stable/c/fa85acf074f000ad3d1a5ffb703128ff97de983d"
     ],
     "status": "Received",
     "verification": "nvd+kev"
