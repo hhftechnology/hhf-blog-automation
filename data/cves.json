@@ -1018,13 +1018,13 @@
   "CVE-2026-120705": {
     "cvss": null,
     "epss": null,
-    "exploitation": "none",
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-25",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-25",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-27",
+    "kevDueDate": "2026-11-30",
+    "lastUpdated": "2026-11-28",
+    "product": "OSGeo GeoServer",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-120705"
     ],
@@ -1599,13 +1599,13 @@
   "CVE-2026-129243": {
     "cvss": null,
     "epss": null,
-    "exploitation": "none",
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-25",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-25",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-27",
+    "kevDueDate": "2026-11-30",
+    "lastUpdated": "2026-11-28",
+    "product": "OSGeo GeoServer",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-129243"
     ],
@@ -2581,24 +2581,31 @@
     "verification": "nvd+kev"
   },
   "CVE-2026-136716": {
-    "cvss": null,
-    "epss": {
-      "date": "2026-11-26",
-      "percentile": 0.62273,
-      "score": 0.01014
+    "cvss": {
+      "score": 9.8,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "version": "3.1"
     },
-    "exploitation": "none",
+    "epss": {
+      "date": "2026-11-27",
+      "percentile": 0.68449,
+      "score": 0.01212
+    },
+    "exploitation": "kev-confirmed",
     "firstSeen": "2026-11-26",
-    "kev": false,
-    "kevDateAdded": null,
-    "kevDueDate": null,
-    "lastUpdated": "2026-11-26",
-    "product": "—",
+    "kev": true,
+    "kevDateAdded": "2026-11-27",
+    "kevDueDate": "2026-11-30",
+    "lastUpdated": "2026-11-28",
+    "product": "Drupal Core",
     "references": [
       "https://nvd.nist.gov/vuln/detail/CVE-2026-136716",
-      "https://www.drupal.org/sa-core-2026-019"
+      "https://www.drupal.org/sa-core-2026-019",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?field_cve=CVE-2026-136716"
     ],
-    "status": "Received",
+    "status": "Modified",
     "verification": "nvd+kev"
   },
   "CVE-2026-136823": {
@@ -2716,6 +2723,84 @@
       "https://github.com/laradashboard/laradashboard/commit/44ddc4a6b2d64c4fb6f801b2de2008be455d980a",
       "https://github.com/laradashboard/laradashboard/security/advisories/GHSA-75q6-qrv2-96rx",
       "https://www.vulncheck.com/advisories/laradashboard-before-1.5.0-path-traversal-rce-via-module-json-namespace-parsing"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-137964": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:X/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-28",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-28",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-137964",
+      "https://github.com/ToolJet/ToolJet/security/advisories/GHSA-74h3-686h-cmvf",
+      "https://www.vulncheck.com/advisories/tooljet-before-3.21.96-lts-command-injection-via-release-workflow-pull-request-title"
+    ],
+    "status": "Awaiting Analysis",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-138004": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-28",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-28",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-138004",
+      "https://gist.github.com/qwq-nm/251e7963d59f41beea2c7ad5ff7ca39f",
+      "https://vuldb.com/cve/CVE-2026-138004",
+      "https://vuldb.com/submit/1066849",
+      "https://vuldb.com/vuln/444939",
+      "https://vuldb.com/vuln/444939/cti"
+    ],
+    "status": "Deferred",
+    "verification": "nvd+kev"
+  },
+  "CVE-2026-138005": {
+    "cvss": {
+      "score": 9.3,
+      "severity": "critical",
+      "source": "NVD",
+      "vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H/E:P/CR:X/IR:X/AR:X/MAV:X/MAC:X/MAT:X/MPR:X/MUI:X/MVC:X/MVI:X/MVA:X/MSC:X/MSI:X/MSA:X/S:X/AU:X/R:X/V:X/RE:X/U:X",
+      "version": "4.0"
+    },
+    "epss": null,
+    "exploitation": "none",
+    "firstSeen": "2026-11-28",
+    "kev": false,
+    "kevDateAdded": null,
+    "kevDueDate": null,
+    "lastUpdated": "2026-11-28",
+    "product": "—",
+    "references": [
+      "https://nvd.nist.gov/vuln/detail/CVE-2026-138005",
+      "https://gist.github.com/qwq-nm/70b4fd27c21fd32e68f929261c01757f",
+      "https://vuldb.com/cve/CVE-2026-138005",
+      "https://vuldb.com/submit/1066878",
+      "https://vuldb.com/vuln/444940",
+      "https://vuldb.com/vuln/444940/cti"
     ],
     "status": "Deferred",
     "verification": "nvd+kev"
